@@ -52,10 +52,23 @@ async def load_models():
     
     print("Loading Symptom ANN Model...")
     if os.path.exists(SYMPTOM_MODEL_PATH):
-        symptom_model = tf.keras.models.load_model(SYMPTOM_MODEL_PATH)
         symptom_classes = np.load(SYMPTOM_MAPPING_PATH, allow_pickle=True)
         df = pd.read_csv(SYMPTOM_DATA_PATH, nrows=1)
         symptom_feature_names = df.drop(columns=['prognosis']).columns.tolist()
+        
+        # Build architecture dynamically to avoid serialization bugs
+        input_dim = len(symptom_feature_names)
+        num_classes = len(symptom_classes)
+        symptom_model = tf.keras.models.Sequential([
+            tf.keras.layers.Dense(256, input_dim=input_dim, activation='relu'),
+            tf.keras.layers.Dropout(0.3),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dense(64, activation='relu'),
+            tf.keras.layers.Dense(num_classes, activation='softmax')
+        ])
+        weights_path = os.path.join(SPRINT3_DIR, "saved_dl_models", "symptom_ann_weights.weights.h5")
+        symptom_model.load_weights(weights_path)
         print("Symptom Model Loaded Successfully.")
     else:
         print(f"Warning: Symptom Model not found at {SYMPTOM_MODEL_PATH}")
