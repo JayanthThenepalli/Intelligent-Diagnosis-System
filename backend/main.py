@@ -75,7 +75,21 @@ async def load_models():
 
     print("Loading Skin Cancer CNN Model...")
     if os.path.exists(SKIN_CANCER_MODEL_PATH):
-        skin_cancer_model = tf.keras.models.load_model(SKIN_CANCER_MODEL_PATH, compile=False)
+        # Build architecture dynamically to avoid BatchNormalization deserialization version bugs
+        base_model = tf.keras.applications.MobileNetV2(
+            weights=None,
+            include_top=False,
+            input_shape=(224, 224, 3)
+        )
+        x = base_model.output
+        x = tf.keras.layers.GlobalAveragePooling2D()(x)
+        x = tf.keras.layers.Dense(128, activation='relu')(x)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        predictions = tf.keras.layers.Dense(len(SKIN_CANCER_CLASSES), activation='softmax')(x)
+        skin_cancer_model = tf.keras.models.Model(inputs=base_model.input, outputs=predictions)
+        
+        weights_path = os.path.join(SPRINT3_DIR, "skin_cancer_cnn_weights.weights.h5")
+        skin_cancer_model.load_weights(weights_path)
         print("Skin Cancer CNN Loaded Successfully.")
     else:
         print(f"Warning: Skin Cancer Model not found at {SKIN_CANCER_MODEL_PATH}")
