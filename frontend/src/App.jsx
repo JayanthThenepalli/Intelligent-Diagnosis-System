@@ -566,16 +566,7 @@ function App() {
             Image Scanner
           </button>
           
-          <div style={{marginTop: '1.5rem', padding: '0 0.5rem', fontSize: '0.8rem', color: 'var(--text-light)', display: 'flex', flexDirection: 'column', gap: '0.65rem'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-              <Cpu size={14} color="var(--primary)" />
-              <span>Inference Engine: active</span>
-            </div>
-            <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-              <Settings size={14} color="var(--primary)" />
-              <span>Version: v1.6.0 (Sprint 6)</span>
-            </div>
-          </div>
+
 
           <button className="theme-toggle-btn" onClick={toggleTheme} style={{marginTop: '1.5rem', width: '100%', justifyContent: 'center'}}>
             {theme === 'dark' ? (
@@ -637,27 +628,7 @@ function App() {
           </div>
         </nav>
         
-        <div className="system-status" style={{ marginTop: '1.5rem' }}>
-          <span className="status-label">System Status</span>
-          
-          <div className="status-indicator">
-            <span style={{display: 'flex', alignItems: 'center'}}>
-              <span className={`status-dot ${backendStatus === 'online' ? '' : 'offline'}`}></span>
-              API Backend
-            </span>
-            <span style={{fontSize: '0.75rem', color: 'var(--text-light)'}}>
-              {backendStatus === 'online' ? 'Port 8001' : 'Offline'}
-            </span>
-          </div>
 
-          <div className="status-indicator">
-            <span style={{display: 'flex', alignItems: 'center'}}>
-              <span className="status-dot"></span>
-              MongoDB
-            </span>
-            <span style={{fontSize: '0.75rem', color: 'var(--text-light)'}}>Local Cache</span>
-          </div>
-        </div>
       </aside>
 
       {/* Main Dashboard Workspace */}
@@ -667,16 +638,7 @@ function App() {
             <h1>Intelligent Diagnosis Suite</h1>
             <p>Evaluating clinical parameters and dermoscopy scans using deep learning neural networks.</p>
           </div>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-val">2 Models</div>
-              <div className="stat-lbl">Active Systems</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-val">&lt; 100ms</div>
-              <div className="stat-lbl">Response Latency</div>
-            </div>
-          </div>
+
         </header>
 
         <div className="workspace-container">
