@@ -583,21 +583,6 @@ function App() {
             <ImageIcon size={18} />
             Image Scanner
           </button>
-          
-          <div className="quick-guide-card" style={{
-            marginTop: '2rem',
-            padding: '1.25rem',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(14, 165, 233, 0.04) 100%)',
-            border: '1px solid var(--border)',
-            fontSize: '0.8rem',
-            color: 'var(--text-light)',
-            lineHeight: '1.5'
-          }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text)', fontWeight: 700, fontSize: '0.85rem' }}>Diagnostic Protocol</h4>
-            <p style={{ margin: 0 }}>Input symptoms or upload lesions on the left workspace. The server-based Keras engines compute predictive probabilities stateless in real time.</p>
-          </div>
-          
 
 
           <button className="theme-toggle-btn" onClick={toggleTheme} style={{marginTop: '1.5rem', width: '100%', justifyContent: 'center'}}>
@@ -668,23 +653,7 @@ function App() {
         <header className="dashboard-header">
           <div className="header-title">
             <h1>Intelligent Diagnosis Suite</h1>
-            <p>Evaluating clinical parameters and dermoscopy scans using deep learning neural networks.</p>
-          </div>
-          <div className="stats-grid">
-            <div className="stat-item" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success)', boxShadow: '0 0 8px var(--success)' }}></span>
-              <div style={{ textAlign: 'left' }}>
-                <div className="stat-val" style={{ fontSize: '0.85rem', color: 'var(--text)', fontWeight: 700 }}>Secure Sync</div>
-                <div className="stat-lbl" style={{ fontSize: '0.65rem', color: 'var(--text-light)', marginTop: '2px' }}>Cloud Active</div>
-              </div>
-            </div>
-            <div className="stat-item" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary)', boxShadow: '0 0 8px var(--secondary)' }}></span>
-              <div style={{ textAlign: 'left' }}>
-                <div className="stat-val" style={{ fontSize: '0.85rem', color: 'var(--text)', fontWeight: 700 }}>Central DB</div>
-                <div className="stat-lbl" style={{ fontSize: '0.65rem', color: 'var(--text-light)', marginTop: '2px' }}>MongoDB Atlas</div>
-              </div>
-            </div>
+            <p>Evaluating clinical parameters and dermoscopy scans.</p>
           </div>
         </header>
 
