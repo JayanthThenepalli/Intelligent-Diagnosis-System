@@ -277,6 +277,24 @@ function App() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const getRecommendedSpecialist = (disease) => {
+    const lower = disease.toLowerCase();
+    if (lower.includes('dengue') || lower.includes('malaria') || lower.includes('typhoid')) return 'Infectious Disease Specialist';
+    if (lower.includes('hypertension') || lower.includes('heart') || lower.includes('varicose')) return 'Cardiologist / Vascular Specialist';
+    if (lower.includes('fungal') || lower.includes('skin') || lower.includes('acne') || lower.includes('psoriasis') || lower.includes('impestigo') || lower.includes('scabies') || lower.includes('lesion') || lower.includes('melanoma') || lower.includes('carcinoma') || lower.includes('actonic') || lower.includes('keratosis') || lower.includes('nevi')) return 'Dermatologist';
+    if (lower.includes('gerd') || lower.includes('peptic') || lower.includes('gastro') || lower.includes('hepatitis') || lower.includes('jaundice')) return 'Gastroenterologist';
+    if (lower.includes('migraine') || lower.includes('paralysis') || lower.includes('cervical') || lower.includes('brain')) return 'Neurologist';
+    if (lower.includes('diabetes') || lower.includes('thyroid')) return 'Endocrinologist';
+    if (lower.includes('bronchial') || lower.includes('pneumonia') || lower.includes('tuberculosis') || lower.includes('cold')) return 'Pulmonologist';
+    if (lower.includes('arthritis') || lower.includes('osteoarthristis')) return 'Rheumatologist / Orthopedic';
+    if (lower.includes('urinary') || lower.includes('renal')) return 'Urologist / Nephrologist';
+    return 'General Physician';
+  };
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
@@ -566,6 +584,20 @@ function App() {
             Image Scanner
           </button>
           
+          <div className="quick-guide-card" style={{
+            marginTop: '2rem',
+            padding: '1.25rem',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(14, 165, 233, 0.04) 100%)',
+            border: '1px solid var(--border)',
+            fontSize: '0.8rem',
+            color: 'var(--text-light)',
+            lineHeight: '1.5'
+          }}>
+            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text)', fontWeight: 700, fontSize: '0.85rem' }}>Diagnostic Protocol</h4>
+            <p style={{ margin: 0 }}>Input symptoms or upload lesions on the left workspace. The server-based Keras engines compute predictive probabilities stateless in real time.</p>
+          </div>
+          
 
 
           <button className="theme-toggle-btn" onClick={toggleTheme} style={{marginTop: '1.5rem', width: '100%', justifyContent: 'center'}}>
@@ -638,7 +670,22 @@ function App() {
             <h1>Intelligent Diagnosis Suite</h1>
             <p>Evaluating clinical parameters and dermoscopy scans using deep learning neural networks.</p>
           </div>
-
+          <div className="stats-grid">
+            <div className="stat-item" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success)', boxShadow: '0 0 8px var(--success)' }}></span>
+              <div style={{ textAlign: 'left' }}>
+                <div className="stat-val" style={{ fontSize: '0.85rem', color: 'var(--text)', fontWeight: 700 }}>Secure Sync</div>
+                <div className="stat-lbl" style={{ fontSize: '0.65rem', color: 'var(--text-light)', marginTop: '2px' }}>Cloud Active</div>
+              </div>
+            </div>
+            <div className="stat-item" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--secondary)', boxShadow: '0 0 8px var(--secondary)' }}></span>
+              <div style={{ textAlign: 'left' }}>
+                <div className="stat-val" style={{ fontSize: '0.85rem', color: 'var(--text)', fontWeight: 700 }}>Central DB</div>
+                <div className="stat-lbl" style={{ fontSize: '0.65rem', color: 'var(--text-light)', marginTop: '2px' }}>MongoDB Atlas</div>
+              </div>
+            </div>
+          </div>
         </header>
 
         <div className="workspace-container">
@@ -769,52 +816,151 @@ function App() {
             </div>
 
             {/* Right Column: Diagnostic Results Dashboard */}
-            <div className="results-panel">
-              <h3 className="results-header-text">
+            <div className="results-panel" style={{ minHeight: '520px', display: 'flex', flexDirection: 'column' }}>
+              <h3 className="results-header-text" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
                 <CheckCircle2 color={results ? 'var(--success)' : 'var(--text-light)'} size={20} />
                 Live Diagnostic Metrics
               </h3>
               
-              {results ? (
-                <div>
-                  {results.map((res, i) => (
-                    <div key={i} className="result-card">
-                      <div className="result-meta">
-                        <span className="res-name">{res.name}</span>
-                        <span className="res-prob">{res.prob}%</span>
+              {isAnalyzing ? (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', color: 'var(--text-light)' }}>
+                  <div style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '50%',
+                    border: '3px solid var(--border)',
+                    borderTopColor: 'var(--primary)',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>Analyzing Diagnostic Parameters...</div>
+                  <div style={{ fontSize: '0.75rem', textAlign: 'center', maxWidth: '240px' }}>Extracting features and executing Keras neural network weights.</div>
+                  
+                  {/* CSS inline trick for spin animation */}
+                  <style>{`
+                    @keyframes spin {
+                      to { transform: rotate(360deg); }
+                    }
+                  `}</style>
+                </div>
+              ) : results ? (
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  {/* Top Result - Radial Dial */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem', textAlign: 'center' }}>
+                    <div style={{ position: 'relative', width: '130px', height: '130px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                      <svg style={{ transform: 'rotate(-90deg)', width: '130px', height: '130px' }}>
+                        <circle cx="65" cy="65" r="54" fill="transparent" stroke="var(--border)" strokeWidth="8" />
+                        <circle cx="65" cy="65" r="54" fill="transparent" stroke="var(--success)" strokeWidth="8"
+                          strokeDasharray="339.29"
+                          strokeDashoffset={339.29 - (339.29 * results[0].prob) / 100}
+                          strokeLinecap="round"
+                          style={{
+                            transition: 'stroke-dashoffset 1.5s cubic-bezier(0.1, 0.8, 0.25, 1)',
+                            filter: 'drop-shadow(0 0 6px var(--success))'
+                          }}
+                        />
+                      </svg>
+                      <div style={{ position: 'absolute', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>
+                        {results[0].prob}%
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-light)', marginBottom: '0.25rem' }}>Primary Diagnosis</div>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text)', margin: 0 }}>{results[0].name}</h2>
+                  </div>
+
+                  {/* Differential Probabilities */}
+                  {results.slice(1).map((res, i) => (
+                    <div key={i} className="result-card" style={{ marginBottom: '1rem' }}>
+                      <div className="result-meta" style={{ marginBottom: '0.5rem' }}>
+                        <span className="res-name" style={{ fontSize: '0.85rem' }}>{res.name}</span>
+                        <span className="res-prob" style={{ fontSize: '0.85rem', color: i === 0 ? 'var(--primary)' : 'var(--secondary)' }}>{res.prob}%</span>
                       </div>
                       <div className="progress-bar-bg">
                         <div 
                           className="progress-bar-fill" 
                           style={{
                             width: `${res.prob}%`, 
-                            backgroundColor: i === 0 ? 'var(--success)' : i === 1 ? 'var(--primary)' : 'var(--secondary)',
-                            boxShadow: i === 0 ? '0 0 8px var(--success)' : 'none'
+                            backgroundColor: i === 0 ? 'var(--primary)' : 'var(--secondary)',
+                            boxShadow: 'none'
                           }}
                         ></div>
                       </div>
                     </div>
                   ))}
-                  
+
+                  {/* Specialist Referral Route */}
                   <div style={{
-                    marginTop: '2rem',
-                    padding: '1rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
-                    fontSize: '0.8rem',
-                    color: 'var(--text-light)'
+                    marginTop: 'auto',
+                    padding: '1.15rem',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(14, 165, 233, 0.05) 100%)',
+                    border: '1px solid rgba(16, 185, 129, 0.15)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.4rem',
+                    boxSizing: 'border-box'
                   }}>
-                    <strong style={{color: 'var(--text)'}}>Clinical Insight:</strong> The results above denote the top 3 highest probabilities derived from model inference. Cross-referencing with a clinical practitioner is recommended.
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--success)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></span>
+                      Recommended Referral Routing
+                    </div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
+                      Schedule consultation: <span style={{ color: 'var(--secondary)' }}>{getRecommendedSpecialist(results[0].name)}</span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', lineHeight: '1.4' }}>
+                      Based on deep learning probability mappings, the patient referral route is directed to this clinical specialty.
+                    </div>
                   </div>
+
+                  {/* Action Print Button */}
+                  <button 
+                    onClick={handlePrint}
+                    style={{
+                      marginTop: '1.25rem',
+                      width: '100%',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid var(--border)',
+                      padding: '0.85rem',
+                      borderRadius: '10px',
+                      color: 'var(--text)',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      transition: 'all 0.2s ease',
+                      boxSizing: 'border-box'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                  >
+                    <FileText size={15} color="var(--primary)" />
+                    Export Referrals Diagnostic Report (PDF)
+                  </button>
                 </div>
               ) : (
-                <div className="empty-results-box">
-                  <Activity className="empty-results-icon" />
-                  <div>Awaiting input for diagnostic evaluation</div>
-                  <div style={{fontSize: '0.75rem', marginTop: '0.5rem'}}>
-                    Deploy diagnostics on the left column to populate inference data.
-                  </div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1.5rem', boxSizing: 'border-box' }}>
+                  {/* ECG Heartbeat Wave SVG */}
+                  <svg viewBox="0 0 300 100" style={{ width: '100%', maxWidth: '240px', height: 'auto', marginBottom: '1.75rem', overflow: 'visible' }}>
+                    <path 
+                      d="M0,50 L80,50 L90,30 L100,70 L110,50 L140,50 L150,15 L160,85 L170,50 L190,50 L200,42 L210,58 L220,50 L300,50" 
+                      fill="none" 
+                      stroke="var(--primary)" 
+                      strokeWidth="3.5" 
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="1000"
+                      strokeDashoffset="1000"
+                      style={{
+                        animation: 'ecg-dash 3.5s linear infinite'
+                      }}
+                    />
+                  </svg>
+                  <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text)', fontSize: '1rem', fontWeight: 700 }}>Diagnostic Monitor Offline</h3>
+                  <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--text-light)', textAlign: 'center', maxWidth: '260px', lineHeight: '1.5' }}>
+                    Awaiting clinical input to execute diagnostics. Enter triage parameters or upload scan images to begin evaluation.
+                  </p>
                 </div>
               )}
             </div>

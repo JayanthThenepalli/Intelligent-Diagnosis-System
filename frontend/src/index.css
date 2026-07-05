@@ -550,3 +550,66 @@ body {
 .theme-toggle-btn:hover {
   background-color: var(--hover-bg);
 }
+
+/* ECG heartbeat pulse animation */
+@keyframes ecg-dash {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Print Overrides for Medical Referral Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0b0f19 !important;
+    font-size: 12pt;
+  }
+  .sidebar, 
+  .dashboard-header, 
+  .btn-primary, 
+  .upload-area, 
+  .quick-guide-card, 
+  .theme-toggle-btn,
+  .form-group,
+  .alert,
+  .logo,
+  .nav-section,
+  .split-layout > :first-child {
+    display: none !important;
+  }
+  .app-container {
+    background: none !important;
+  }
+  .split-layout {
+    display: block !important;
+    gap: 0 !important;
+  }
+  .results-panel {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  .results-panel button {
+    display: none !important;
+  }
+  .results-header-text {
+    color: #0b0f19 !important;
+  }
+  .result-card {
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+  }
+  .res-name, .res-prob {
+    color: #0b0f19 !important;
+  }
+  .progress-bar-bg {
+    background-color: #cbd5e1 !important;
+  }
+}
+
