@@ -258,10 +258,12 @@ def build_academic_report():
         p_cnn_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_cnn_cap.add_run("Figure 4.4: Skin Lesion CNN (MobileNetV2) Confusion Matrix Heatmap").italic = True
 
+    doc.add_page_break()
+
     # ----------------------------------------------------
     # CHAPTER 5: SOFTWARE ENGINEERING INNOVATIONS
     # ----------------------------------------------------
-    doc.add_heading('Chapter 5: Software Engineering Innovations', level=1)
+    doc.add_heading('Chapter 5: Software Engineering Innovations & Deployments', level=1)
     
     doc.add_heading('5.1 Automated Clinical Specialist Referral', level=2)
     doc.add_paragraph(
@@ -277,6 +279,49 @@ def build_academic_report():
         "referral letter suitable for physical print or PDF download."
     )
 
+    doc.add_heading('5.3 Asynchronous Non-Blocking Database Operations', level=2)
+    doc.add_paragraph(
+        "In compliance with high concurrent transaction requirements, we utilized the asynchronous 'motor' Python driver to interface "
+        "with MongoDB Atlas. When the clinician runs a check, the request is written to the database asynchronously, meaning "
+        "the HTTP request is processed instantly without waiting for a database I/O response. This optimizes backend API throughput."
+    )
+
+    doc.add_heading('5.4 Dockerized Microservice Containerization', level=2)
+    doc.add_paragraph(
+        "To run deep learning models statelessly in the cloud, the backend was containerized. To reduce memory footprint (which standard "
+        "TensorFlow installations inflate past 3GB), we compiled using a multi-stage Docker build that isolates the virtual environment "
+        "and installs tensorflow-cpu. This reduced container size down to ~450MB, resolving memory constraints."
+    )
+
+    doc.add_heading('5.5 CORS Security Middleware configuration', level=2)
+    doc.add_paragraph(
+        "To protect client-server communication from unauthorized domain interactions, cross-origin resource sharing (CORS) rules "
+        "are enforced. The FastAPI server restricts access, only allowing HTTP POST queries coming from the verified Vercel web app client."
+    )
+
+    doc.add_heading('5.6 Step-by-Step CI/CD Deployment Procedure', level=2)
+    doc.add_paragraph(
+        "The complete system is deployed using a modern Continuous Integration / Continuous Deployment (CI/CD) pipeline:"
+    )
+    
+    doc.add_paragraph(
+        "1. Cloud Database Provisioning (MongoDB Atlas): We provisioned a cloud replica set (M0 cluster) in MongoDB Atlas. We set up an "
+        "IP Access List to allow connection queries and bound the connection URI string as a secure credential.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "2. Backend Deployment (Render.com): The FastAPI code repository was linked directly to Render web service triggers. Render pulls "
+        "commits, builds the container environment using requirements.txt, binds the MONGO_URI string environment variable, and serves "
+        "the endpoints live under uvicorn.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "3. Frontend Deployment (Vercel): The React client was linked to Vercel's automated git hooks. To resolve monorepo building boundaries, "
+        "we wrote a root vercel.json that directs Vercel to build the static frontend subdirectory using Vite. The VITE_API_URL environment "
+        "variable was bound to Vercel to direct API calls to the Render server endpoint.",
+        style='List Bullet'
+    )
+
     # ----------------------------------------------------
     # CHAPTER 6: CONCLUSION
     # ----------------------------------------------------
@@ -290,7 +335,7 @@ def build_academic_report():
 
     output_file = 'Academic_Final_Report.docx'
     doc.save(output_file)
-    print(f"Updated Academic Report saved successfully as {output_file}!")
+    print(f"Updated Academic Report with deployments saved successfully as {output_file}!")
 
 if __name__ == '__main__':
     build_academic_report()
