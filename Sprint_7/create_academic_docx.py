@@ -153,12 +153,66 @@ def build_academic_report():
         p_cap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_cap2.add_run("Figure 3.1: Decoupled Multi-Tier System Architecture").italic = True
 
-    doc.add_heading('3.2 Data Flow Logic', level=2)
+    # 3.2 Detailed Frontend Presentation Layer
+    doc.add_heading('3.2 Presentation Layer Details (Frontend React.js SPA)', level=2)
     doc.add_paragraph(
-        "Client requests dispatch JSON payloads or multipart FormData to the server. The FastAPI service executes inference "
-        "in-memory (caching the models on startup to reduce response latency to <100ms) and dispatches the raw diagnostic log "
-        "to MongoDB Atlas asynchronously using the non-blocking 'motor' driver. This ensures the database transaction does not "
-        "block the primary HTTP response pipeline, satisfying high availability constraints."
+        "The client frontend is engineered as a dynamic Single Page Application (SPA) using React.js and Vite. "
+        "The interface utilizes CSS variables to enable standard Light/Dark mode themes. Key technical elements include:"
+    )
+    doc.add_paragraph(
+        "State Management: Leverages React Hooks (useState, useEffect, and useRef) to coordinate clinician session tokens, "
+        "input symptom selections, uploaded image file references, API diagnostic load results, and visual loader flags.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "EKG Heartbeat SVG wave Monitor: Employs a custom SVG vector trace animated using CSS @keyframes stroke-dashoffset "
+        "rules, serving as a dynamic diagnostic pulse indicator while requests are processed.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "Radial Confidence Gauges: Renders standard SVG progress rings calculating path dasharray lengths mathematically "
+        "based on predicted probability values returned by the backend API.",
+        style='List Bullet'
+    )
+
+    # 3.3 Detailed Backend Service Layer
+    doc.add_heading('3.3 Service Layer Details (Backend FastAPI Server)', level=2)
+    doc.add_paragraph(
+        "The logic and prediction service is written in Python using the FastAPI framework. The endpoints are served "
+        "statelessly using the Uvicorn ASGI server. Key implementation parameters include:"
+    )
+    doc.add_paragraph(
+        "Asynchronous Model Caching: Neural network weights are loaded into RAM during server startup using an async context "
+        "manager lifecycle hook. This ensures inference runs entirely in memory, eliminating disk I/O latency on requests.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "Pydantic Schema Validation: Enforces strict data models for HTTP transactions. Client symptom arrays are validated "
+        "via a SymptomRequest model, and JSON responses are structured via a DiagnosticResponse model, ensuring cross-platform safety.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "CORS Security Layer: Configures FastAPI's CORSMiddleware, whitelisting only the frontend Vercel origin domain to block "
+        "cross-origin cross-site scripting (XSS) attacks.",
+        style='List Bullet'
+    )
+
+    # 3.4 Detailed Database Persistence Layer
+    doc.add_heading('3.4 Persistence Layer Details (MongoDB Atlas Cloud Cluster)', level=2)
+    doc.add_paragraph(
+        "Patient logging data is persisted on a MongoDB Atlas M0 replica set cluster hosted in the cloud. Key database designs include:"
+    )
+    doc.add_paragraph(
+        "Non-blocking Motor Driver: Database calls utilize the 'motor' asynchronous Python client, allowing insertions to be queued "
+        "and processed concurrently without blocking the primary HTTP event loop.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "Diagnostic Log Document Schema: Logs are persisted as JSON documents. Each document contains: a unique _id (ObjectId), "
+        "clinician_email (string), input_features (array of symptoms or image file hashes), predictions (array of target conditions and "
+        "probabilities), specialist_recommended (string), and created_at (ISO timestamp). This schema allows flexible schema-less logging "
+        "for audits.",
+        style='List Bullet'
     )
 
     doc.add_page_break()
@@ -357,7 +411,7 @@ def build_academic_report():
 
     output_file = 'Academic_Final_Report.docx'
     doc.save(output_file)
-    print(f"Updated Academic Report with deployments results saved successfully as {output_file}!")
+    print(f"Updated Academic Report with detailed specs saved successfully as {output_file}!")
 
 if __name__ == '__main__':
     build_academic_report()
