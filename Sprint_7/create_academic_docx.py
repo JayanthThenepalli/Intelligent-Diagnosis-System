@@ -215,6 +215,21 @@ def build_academic_report():
         style='List Bullet'
     )
 
+    # 3.5 System Integration Workflow DFD
+    doc.add_heading('3.5 System Integration Workflow (DFD Data Flow)', level=2)
+    doc.add_paragraph(
+        "To detail the explicit transactions between the React client, API server, and cloud database, the following data flow "
+        "diagram (DFD) details the step-by-step transaction lifecycle:"
+    )
+    dfd_img = "System_Integration_Workflow.png"
+    if os.path.exists(dfd_img):
+        p_dfd = doc.add_paragraph()
+        p_dfd.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_dfd.add_run().add_picture(dfd_img, width=Inches(5.0))
+        p_dfd_cap = doc.add_paragraph()
+        p_dfd_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_dfd_cap.add_run("Figure 3.2: System Integration Workflow Data Flow Diagram (DFD)").italic = True
+
     doc.add_page_break()
 
     # ----------------------------------------------------
@@ -284,7 +299,7 @@ def build_academic_report():
     doc.add_page_break()
 
     # Final Deployed Models
-    doc.add_heading('4.4 Symptom Predictor ANN Performance', level=2)
+    doc.add_heading('4.4 Symptom Predictor ANN Performance & Graphs', level=2)
     doc.add_paragraph(
         "The final deployed Keras ANN model achieved 98.42% accuracy. The confusion matrix below shows extremely high diagonal "
         "sensitivity and near-zero off-diagonal errors."
@@ -298,7 +313,20 @@ def build_academic_report():
         p_ann_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_ann_cap.add_run("Figure 4.3: Symptom Predictor ANN Confusion Matrix Heatmap").italic = True
 
-    doc.add_heading('4.5 Skin Lesion CNN Performance', level=2)
+    doc.add_paragraph(
+        "The training and validation history plots illustrate high learning convergence, with training loss declining steadily "
+        "and accuracy stabilizing at 98.42% over the 50 epochs:"
+    )
+    ann_hist = "ANN_Training_History.png"
+    if os.path.exists(ann_hist):
+        p_ann_hist = doc.add_paragraph()
+        p_ann_hist.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_ann_hist.add_run().add_picture(ann_hist, width=Inches(5.0))
+        p_ann_hist_cap = doc.add_paragraph()
+        p_ann_hist_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_ann_hist_cap.add_run("Figure 4.4: Symptom Predictor ANN Training Accuracy and Loss Curves").italic = True
+
+    doc.add_heading('4.5 Skin Lesion CNN Performance & Graphs', level=2)
     doc.add_paragraph(
         "The skin cancer CNN classifier achieved 89.50% overall validation accuracy. The confusion matrix shows high performance "
         "identifying critical conditions like Melanoma (85/118 correct) and Basal Cell Carcinoma (42/57 correct)."
@@ -310,7 +338,20 @@ def build_academic_report():
         p_cnn.add_run().add_picture(cnn_img, width=Inches(4.5))
         p_cnn_cap = doc.add_paragraph()
         p_cnn_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_cnn_cap.add_run("Figure 4.4: Skin Lesion CNN (MobileNetV2) Confusion Matrix Heatmap").italic = True
+        p_cnn_cap.add_run("Figure 4.5: Skin Lesion CNN (MobileNetV2) Confusion Matrix Heatmap").italic = True
+
+    doc.add_paragraph(
+        "Due to transfer learning using MobileNetV2, the model reached convergence rapidly over 5 epochs, avoiding early "
+        "training overfitting via the dropout layers:"
+    )
+    cnn_hist = "CNN_Training_History.png"
+    if os.path.exists(cnn_hist):
+        p_cnn_hist = doc.add_paragraph()
+        p_cnn_hist.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cnn_hist.add_run().add_picture(cnn_hist, width=Inches(5.0))
+        p_cnn_hist_cap = doc.add_paragraph()
+        p_cnn_hist_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cnn_hist_cap.add_run("Figure 4.6: Skin Lesion CNN Training Accuracy and Loss Curves").italic = True
 
     doc.add_page_break()
 
@@ -411,7 +452,7 @@ def build_academic_report():
 
     output_file = 'Academic_Final_Report.docx'
     doc.save(output_file)
-    print(f"Updated Academic Report with detailed specs saved successfully as {output_file}!")
+    print(f"Final Complete Academic Report with graphs saved successfully as {output_file}!")
 
 if __name__ == '__main__':
     build_academic_report()
