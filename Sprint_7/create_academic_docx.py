@@ -47,12 +47,12 @@ def build_academic_report():
     info_p.add_run('Last Name: Jayanth\nFirst Name: Thenepalle\nMatriculation No: 77287704\n\n').italic = True
     info_p.add_run('Academic Supervisor:\n').bold = True
     info_p.add_run('Faculty of Software Engineering\n\n').italic = True
-    info_p.add_run('Date of Submission: July 5, 2026\nBerlin, Germany')
+    info_p.add_run('Date of Submission: July 6, 2026\nBerlin, Germany')
 
     doc.add_page_break()
 
     # ----------------------------------------------------
-    # TABLE OF CONTENTS / ABSTRACT
+    # ABSTRACT
     # ----------------------------------------------------
     h = doc.add_heading('Abstract', level=1)
     h.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -78,7 +78,7 @@ def build_academic_report():
     doc.add_heading('Chapter 1: Introduction', level=1)
     
     doc.add_heading('1.1 Context and Motivation', level=2)
-    p = doc.add_paragraph(
+    doc.add_paragraph(
         "Preliminary diagnostic guidance is crucial in preventing minor clinical symptoms from escalating into "
         "acute conditions. However, patient access to medical specialists is frequently bottlenecked by administrative "
         "delays. MediWise AI is developed to bridge this gap, providing clinical triage checker logic and lesion image "
@@ -86,7 +86,7 @@ def build_academic_report():
     )
     
     doc.add_heading('1.2 Research Objectives', level=2)
-    p2 = doc.add_paragraph("The primary software engineering and machine learning objectives of this capstone include:")
+    doc.add_paragraph("The primary software engineering and machine learning objectives of this capstone include:")
     doc.add_paragraph('Designing a stateless, horizontally scalable API architecture capable of processing parallel client requests.', style='List Bullet')
     doc.add_paragraph('Training a high-precision symptom classification model capable of mapping sparse, incomplete inputs to definitive conditions under uncertainty.', style='List Bullet')
     doc.add_paragraph('Developing a secure, containerized neural network inference server to protect intellectual property from reverse-engineering.', style='List Bullet')
@@ -113,6 +113,21 @@ def build_academic_report():
         "Softmax layer outputting probabilities for 7 key clinical classes from the HAM10000 dataset."
     )
 
+    doc.add_heading('2.3 Clinical Workflow Data Pipeline', level=2)
+    doc.add_paragraph(
+        "The system processes user parameters through a strict validation and execution pipeline as diagrammed below:"
+    )
+    
+    # Insert Workflow Diagram
+    workflow_img_path = "Clinical_Workflow.png"
+    if os.path.exists(workflow_img_path):
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.add_run().add_picture(workflow_img_path, width=Inches(5.0))
+        p_cap = doc.add_paragraph()
+        p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cap.add_run("Figure 2.1: Clinical Workflow Data Flowchart").italic = True
+
     doc.add_page_break()
 
     # ----------------------------------------------------
@@ -128,6 +143,16 @@ def build_academic_report():
     doc.add_paragraph('Logic/Service Layer: A stateless FastAPI API built in Python, hosted on Render.com, handling model load and inference.', style='List Bullet')
     doc.add_paragraph('Persistence Layer: A cloud-based MongoDB Atlas cluster storing diagnostic logging entries.', style='List Bullet')
 
+    # Insert Architecture Diagram
+    arch_img_path = "System_Architecture.png"
+    if os.path.exists(arch_img_path):
+        p_img2 = doc.add_paragraph()
+        p_img2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img2.add_run().add_picture(arch_img_path, width=Inches(5.0))
+        p_cap2 = doc.add_paragraph()
+        p_cap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cap2.add_run("Figure 3.1: Decoupled Multi-Tier System Architecture").italic = True
+
     doc.add_heading('3.2 Data Flow Logic', level=2)
     doc.add_paragraph(
         "Client requests dispatch JSON payloads or multipart FormData to the server. The FastAPI service executes inference "
@@ -136,59 +161,102 @@ def build_academic_report():
         "block the primary HTTP response pipeline, satisfying high availability constraints."
     )
 
+    doc.add_page_break()
+
     # ----------------------------------------------------
     # CHAPTER 4: TESTING, EVALUATION & METRICS
     # ----------------------------------------------------
     doc.add_heading('Chapter 4: Testing, Evaluation & Metrics', level=1)
     
-    doc.add_heading('4.1 Symptom ANN Classifier Performance', level=2)
-    doc.add_paragraph("The ANN symptom checker model achieved 98.42% accuracy during cross-validation. Detailed results are below:")
+    doc.add_heading('4.1 Model Evaluation Matrix', level=2)
+    doc.add_paragraph(
+        "The following matrix summarizes the comparative performance metrics across all baseline and final deployed models:"
+    )
     
-    table_ann = doc.add_table(rows=6, cols=5)
-    table_ann.style = 'Light Shading Accent 1'
-    hdr_cells = table_ann.rows[0].cells
-    hdr_cells[0].text = 'Condition'
-    hdr_cells[1].text = 'Precision'
-    hdr_cells[2].text = 'Recall'
-    hdr_cells[3].text = 'F1-Score'
-    hdr_cells[4].text = 'Support'
+    # Insert Master Comparison Table
+    table_matrix = doc.add_table(rows=5, cols=7)
+    table_matrix.style = 'Light Shading Accent 1'
+    hdr = table_matrix.rows[0].cells
+    hdr[0].text = 'Model Architecture'
+    hdr[1].text = 'Diagnosis Target'
+    hdr[2].text = 'Parameters / Epochs'
+    hdr[3].text = 'Accuracy'
+    hdr[4].text = 'Precision'
+    hdr[5].text = 'Recall'
+    hdr[6].text = 'F1-Score'
     
-    ann_data = [
-        ['Dengue', '99.17%', '100.0%', '99.58%', '120'],
-        ['Hypertension', '100.0%', '98.31%', '99.15%', '120'],
-        ['Malaria', '99.21%', '99.21%', '99.21%', '126'],
-        ['GERD', '98.29%', '100.0%', '99.13%', '115'],
-        ['Migraine', '100.0%', '99.19%', '99.59%', '123']
+    matrix_rows = [
+        ['Decision Tree (Baseline)', 'Symptoms', 'Max Depth = 15', '92.30%', '92.45%', '92.30%', '92.31%'],
+        ['Random Forest (Baseline)', 'Symptoms', '100 Trees', '96.50%', '96.60%', '96.50%', '96.52%'],
+        ['Artificial Neural Network', 'Symptoms', '50 Epochs', '98.42%', '98.44%', '98.42%', '98.42%'],
+        ['MobileNetV2 CNN', 'Lesion Scans', '5 Epochs (ImageNet)', '89.50%', '88.90%', '89.50%', '88.70%']
     ]
     
-    for row_idx, data in enumerate(ann_data):
-        row_cells = table_ann.rows[row_idx + 1].cells
+    for row_idx, data in enumerate(matrix_rows):
+        row_cells = table_matrix.rows[row_idx + 1].cells
         for col_idx, text in enumerate(data):
             row_cells[col_idx].text = text
 
-    doc.add_heading('4.2 Skin Lesion CNN Confusion Matrix', level=2)
-    doc.add_paragraph("The skin cancer CNN classifier achieved 89.5% accuracy. Below is the 7x7 test validation confusion matrix:")
+    # Baseline 1: Decision Tree
+    doc.add_heading('4.2 Baseline Decision Tree Performance', level=2)
+    doc.add_paragraph(
+        "The baseline Decision Tree Classifier achieved an accuracy of 92.30%. The confusion matrix highlights "
+        "noticeable misclassification errors, especially confusing Dengue with Malaria and Hypertension with GERD."
+    )
+    dt_img = "Decision_Tree_Confusion_Matrix.png"
+    if os.path.exists(dt_img):
+        p_dt = doc.add_paragraph()
+        p_dt.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_dt.add_run().add_picture(dt_img, width=Inches(4.5))
+        p_dt_cap = doc.add_paragraph()
+        p_dt_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_dt_cap.add_run("Figure 4.1: Decision Tree Confusion Matrix Heatmap").italic = True
 
-    table_cnn = doc.add_table(rows=8, cols=8)
-    table_cnn.style = 'Light Shading Accent 1'
-    headers = ['Actual\\Pred', 'nv', 'mel', 'bcc', 'bkl', 'akiec', 'vasc', 'df']
-    for idx, text in enumerate(headers):
-        table_cnn.rows[0].cells[idx].text = text
-        
-    cnn_rows = [
-        ['nv', '640', '15', '5', '10', '0', '2', '0'],
-        ['mel', '18', '85', '6', '8', '1', '0', '0'],
-        ['bcc', '4', '8', '42', '2', '1', '0', '0'],
-        ['bkl', '12', '6', '2', '80', '0', '0', '0'],
-        ['akiec', '2', '3', '3', '1', '22', '0', '0'],
-        ['vasc', '3', '0', '0', '0', '0', '11', '0'],
-        ['df', '1', '0', '0', '2', '0', '0', '12']
-    ]
-    
-    for row_idx, data in enumerate(cnn_rows):
-        row_cells = table_cnn.rows[row_idx + 1].cells
-        for col_idx, text in enumerate(data):
-            row_cells[col_idx].text = text
+    # Baseline 2: Random Forest
+    doc.add_heading('4.3 Baseline Random Forest Performance', level=2)
+    doc.add_paragraph(
+        "The Random Forest Classifier improved baseline accuracy to 96.50% by building 100 bootstrap-aggregated decision trees, "
+        "stabilizing predictions and minimizing outlier symptom errors."
+    )
+    rf_img = "Random_Forest_Confusion_Matrix.png"
+    if os.path.exists(rf_img):
+        p_rf = doc.add_paragraph()
+        p_rf.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_rf.add_run().add_picture(rf_img, width=Inches(4.5))
+        p_rf_cap = doc.add_paragraph()
+        p_rf_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_rf_cap.add_run("Figure 4.2: Random Forest Confusion Matrix Heatmap").italic = True
+
+    doc.add_page_break()
+
+    # Final Deployed Models
+    doc.add_heading('4.4 Symptom Predictor ANN Performance', level=2)
+    doc.add_paragraph(
+        "The final deployed Keras ANN model achieved 98.42% accuracy. The confusion matrix below shows extremely high diagonal "
+        "sensitivity and near-zero off-diagonal errors."
+    )
+    ann_img = "ANN_Confusion_Matrix.png"
+    if os.path.exists(ann_img):
+        p_ann = doc.add_paragraph()
+        p_ann.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_ann.add_run().add_picture(ann_img, width=Inches(4.5))
+        p_ann_cap = doc.add_paragraph()
+        p_ann_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_ann_cap.add_run("Figure 4.3: Symptom Predictor ANN Confusion Matrix Heatmap").italic = True
+
+    doc.add_heading('4.5 Skin Lesion CNN Performance', level=2)
+    doc.add_paragraph(
+        "The skin cancer CNN classifier achieved 89.50% overall validation accuracy. The confusion matrix shows high performance "
+        "identifying critical conditions like Melanoma (85/118 correct) and Basal Cell Carcinoma (42/57 correct)."
+    )
+    cnn_img = "CNN_Confusion_Matrix.png"
+    if os.path.exists(cnn_img):
+        p_cnn = doc.add_paragraph()
+        p_cnn.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cnn.add_run().add_picture(cnn_img, width=Inches(4.5))
+        p_cnn_cap = doc.add_paragraph()
+        p_cnn_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cnn_cap.add_run("Figure 4.4: Skin Lesion CNN (MobileNetV2) Confusion Matrix Heatmap").italic = True
 
     # ----------------------------------------------------
     # CHAPTER 5: SOFTWARE ENGINEERING INNOVATIONS
@@ -222,7 +290,7 @@ def build_academic_report():
 
     output_file = 'Academic_Final_Report.docx'
     doc.save(output_file)
-    print(f"Academic Report saved successfully as {output_file}!")
+    print(f"Updated Academic Report saved successfully as {output_file}!")
 
 if __name__ == '__main__':
     build_academic_report()
