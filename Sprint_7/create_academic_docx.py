@@ -95,9 +95,33 @@ def build_academic_report():
     # ----------------------------------------------------
     # CHAPTER 2: METHODOLOGY & MODEL DEVELOPMENT
     # ----------------------------------------------------
-    doc.add_heading('Chapter 2: Methodology & Model Development', level=1)
+    doc.add_heading('Chapter 2: Methodology, Datasets & Model Development', level=1)
     
-    doc.add_heading('2.1 Symptom Predictor ANN', level=2)
+    doc.add_heading('2.1 Dataset Characterization & Sources', level=2)
+    doc.add_paragraph(
+        "The predictive models are trained on two distinct datasets representing different clinical modalities:"
+    )
+    doc.add_paragraph(
+        "1. Symptom Checker Dataset: Ingested from the Columbia University / Kaggle Disease Prediction repository. "
+        "It consists of 49,200 observation rows. Each row maps a specific combination of symptoms to one of 41 categorical target diseases "
+        "(e.g., Dengue, Malaria, GERD, Hepatitis A-E, Acne). The dataset comprises 132 unique binary symptoms representing clinical presentations.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "2. Skin Lesion Image Dataset: Ingested from the HAM10000 dataset (Human Against Machine) hosted on Harvard Dataverse. "
+        "It comprises 10,015 high-resolution dermoscopy scans of skin lesions, classified into 7 distinct dermatological diagnostic "
+        "classes: Melanocytic Nevi (nv), Melanoma (mel), Basal Cell Carcinoma (bcc), Benign Keratosis (bkl), Actinic Keratosis (akiec), "
+        "Vascular Lesions (vasc), and Dermatofibroma (df).",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "Dataset Utilization: The symptom checker dataset was utilized to train the baseline Decision Tree, Random Forest, and final "
+        "proposed Artificial Neural Network (ANN) triage models. The HAM10000 dataset was utilized to train the proposed MobileNetV2 "
+        "Convolutional Neural Network (CNN) image classifier.",
+        style='List Bullet'
+    )
+
+    doc.add_heading('2.2 Symptom Predictor ANN Model', level=2)
     doc.add_paragraph(
         "The symptom checker utilizes a fully connected Artificial Neural Network (ANN) designed with Keras. "
         "The model ingests a 132-dimension binary feature space (representing the presence or absence of specific clinical symptoms) "
@@ -105,7 +129,7 @@ def build_academic_report():
         "nature of the input space. Overfitting is prevented using Dropout layers (rate = 0.2) and early stopping criteria during training."
     )
 
-    doc.add_heading('2.2 Image Classifier CNN', level=2)
+    doc.add_heading('2.3 Image Classifier CNN Model', level=2)
     doc.add_paragraph(
         "For skin lesion classification, we implement a Convolutional Neural Network (CNN) using MobileNetV2 as a base feature "
         "extractor. Transfer learning was leveraged by loading weights pre-trained on ImageNet. The top layers were replaced "
@@ -113,7 +137,7 @@ def build_academic_report():
         "Softmax layer outputting probabilities for 7 key clinical classes from the HAM10000 dataset."
     )
 
-    doc.add_heading('2.3 Data Preprocessing & Augmentation Pipelines', level=2)
+    doc.add_heading('2.4 Data Preprocessing & Augmentation Pipelines', level=2)
     doc.add_paragraph(
         "To ensure models generalize robustly and resist clinical noise, raw datasets undergo strict preprocessing pipelines:"
     )
@@ -134,7 +158,7 @@ def build_academic_report():
         style='List Bullet'
     )
 
-    doc.add_heading('2.4 Clinical Workflow Data Pipeline', level=2)
+    doc.add_heading('2.5 Clinical Workflow Data Pipeline', level=2)
     doc.add_paragraph(
         "The system processes user parameters through a strict validation and execution pipeline as diagrammed below:"
     )
@@ -473,7 +497,7 @@ def build_academic_report():
 
     output_file = 'Academic_Final_Report.docx'
     doc.save(output_file)
-    print(f"Final Airtight Academic Report saved successfully as {output_file}!")
+    print(f"Final Complete Academic Report with datasets saved successfully as {output_file}!")
 
 if __name__ == '__main__':
     build_academic_report()
