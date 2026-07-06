@@ -113,7 +113,28 @@ def build_academic_report():
         "Softmax layer outputting probabilities for 7 key clinical classes from the HAM10000 dataset."
     )
 
-    doc.add_heading('2.3 Clinical Workflow Data Pipeline', level=2)
+    doc.add_heading('2.3 Data Preprocessing & Augmentation Pipelines', level=2)
+    doc.add_paragraph(
+        "To ensure models generalize robustly and resist clinical noise, raw datasets undergo strict preprocessing pipelines:"
+    )
+    doc.add_paragraph(
+        "Symptom Tabular Data Preprocessing: The inputs are formatted as a 132-dimension sparse binary vector. Standard z-score "
+        "normalization or scaling is bypassed, preserving the integer-based presence (1) or absence (0) states directly for the ANN input layer.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "Dermoscopy Image Normalization: Images are resized down to uniform 224x224x3 resolutions. Pixel intensity integers [0, 255] "
+        "are normalized to floats [0.0, 1.0] by dividing by 255.0 to optimize optimizer gradient descent steps.",
+        style='List Bullet'
+    )
+    doc.add_paragraph(
+        "Image Augmentation (CNN): To prevent model overfitting on dermoscopy skin textures, real-time image augmentation is configured "
+        "using ImageDataGenerator. This includes: random rotations up to 20 degrees, width/height shifts of 20%, shear/zoom ranges of 20%, "
+        "horizontal flips, and a 20% holdout validation split.",
+        style='List Bullet'
+    )
+
+    doc.add_heading('2.4 Clinical Workflow Data Pipeline', level=2)
     doc.add_paragraph(
         "The system processes user parameters through a strict validation and execution pipeline as diagrammed below:"
     )
@@ -452,7 +473,7 @@ def build_academic_report():
 
     output_file = 'Academic_Final_Report.docx'
     doc.save(output_file)
-    print(f"Final Complete Academic Report with graphs saved successfully as {output_file}!")
+    print(f"Final Airtight Academic Report saved successfully as {output_file}!")
 
 if __name__ == '__main__':
     build_academic_report()
