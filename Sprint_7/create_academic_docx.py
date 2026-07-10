@@ -92,6 +92,78 @@ def build_academic_report():
     doc.add_paragraph('Developing a secure, containerized neural network inference server to protect intellectual property from reverse-engineering.', style='List Bullet')
     doc.add_paragraph('Integrating cloud database persistence to track logs in compliance with clinical audit standards.', style='List Bullet')
     
+    doc.add_heading('1.3 Literature Review Summary Matrix', level=2)
+    doc.add_paragraph(
+        "To anchor the development of MediWise AI in established scientific research, Table I presents a literature "
+        "review matrix summarizing prior methods and integration guidelines compiled in IEEE format style (horizontal-only lines):"
+    )
+
+    # IEEE Table Title Above
+    p_t1_title = doc.add_paragraph()
+    p_t1_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_t1 = p_t1_title.add_run("TABLE I\nLITERATURE REVIEW SUMMARY MATRIX")
+    run_t1.bold = True
+    run_t1.font.size = Pt(10)
+
+    t1 = doc.add_table(rows=8, cols=4)
+    t1.style = 'Light Shading Accent 1' # Word built-in layout matching minimal horizontal lines
+    t1_hdr = t1.rows[0].cells
+    t1_hdr[0].text = 'Author (Year)'
+    t1_hdr[1].text = 'Methodology'
+    t1_hdr[2].text = 'Key Findings'
+    t1_hdr[3].text = 'MediWise Integration / Improvement'
+
+    lit_rows = [
+        [
+            "Tschandl, P., Rosendahl, C., & Kittler, H. (2018)",
+            "HAM10000 dataset collection & SVM baseline.",
+            "10,015 pigmented skin lesion images for ML validation.",
+            "Extends classification using Transfer Learning MobileNetV2 CNN, improving baseline accuracy to 89.5%."
+        ],
+        [
+            "Sandler, M., Howard, A., Zhu, M., Zhmoginov, A., & Chen, L. C. (2018)",
+            "MobileNetV2 inverted residual block architecture.",
+            "Optimizes parameter count and memory usage for edge devices.",
+            "Leveraged MobileNetV2 to shrink model footprint in cloud server to ~340MB, enabling free-tier deployment."
+        ],
+        [
+            "Esteva, A., Kuprel, B., Novoa, R. A., Ko, J., Swetter, S. M., Blau, H. M., & Thrun, S. (2017)",
+            "Dermatologist-level skin cancer classification using deep CNNs.",
+            "Validated deep learning capability matching professional clinical sensitivity.",
+            "Translates deep neural scans into a web portal providing preliminary skin diagnostic screenings."
+        ],
+        [
+            "Chen, J., Li, K., Rong, H., Bilal, K., Yang, N., & Li, K. (2020)",
+            "Clinical Decision Support Systems (CDSS) built with Relational DBs.",
+            "Database locks bottleneck backend servers during concurrent sessions.",
+            "Implements asynchronous Motor client with MongoDB Atlas, removing I/O blocking from the HTTP thread."
+        ],
+        [
+            "Pedregosa, F. et al. (2011)",
+            "Scikit-learn open source machine learning library in Python.",
+            "Provides standardized APIs for baseline classifiers (decision trees, forests).",
+            "Leveraged for compiling and evaluating classical ML baseline comparative metrics."
+        ],
+        [
+            "Abadi, M. et al. (2016)",
+            "TensorFlow: A system for large-scale machine learning.",
+            "Provides robust dataflow graphs for training deep neural architectures.",
+            "Used Keras & TensorFlow backend to compile proposed ANN and CNN layers."
+        ],
+        [
+            "Bano, G., Khan, A. S., & Latif, M. (2021)",
+            "Review of web-based clinical decision support systems.",
+            "Outlines requirements for doctor-patient interactions and referral routing.",
+            "Implements clinical routing maps routing diagnoses directly to corresponding specialists."
+        ]
+    ]
+    for row_idx, data in enumerate(lit_rows):
+        row_cells = t1.rows[row_idx + 1].cells
+        for col_idx, text in enumerate(data):
+            row_cells[col_idx].text = text
+
+    doc.add_page_break()
+
     # ----------------------------------------------------
     # CHAPTER 2: METHODOLOGY & MODEL DEVELOPMENT
     # ----------------------------------------------------
@@ -176,7 +248,7 @@ def build_academic_report():
     doc.add_page_break()
 
     # ----------------------------------------------------
-    # CHAPTER 3: SYSTEM ARCHITECTURE & LITERATURE SUMMARY
+    # CHAPTER 3: SYSTEM ARCHITECTURE
     # ----------------------------------------------------
     doc.add_heading('Chapter 3: System Architecture', level=1)
     
@@ -274,59 +346,6 @@ def build_academic_report():
         p_dfd_cap = doc.add_paragraph()
         p_dfd_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_dfd_cap.add_run("Figure 3.2: System Integration Workflow Data Flow Diagram (DFD)").italic = True
-
-    # 3.6 Literature Review Matrix (IEEE Style Table)
-    doc.add_heading('3.6 Literature Review Summary Matrix', level=2)
-    doc.add_paragraph(
-        "To anchor the development of MediWise AI in established scientific research, Table 3.1 presents a literature "
-        "review matrix summarizing prior methods and integration guidelines compiled in IEEE format style (horizontal-only lines):"
-    )
-
-    # IEEE Table Title Above
-    p_t1_title = doc.add_paragraph()
-    p_t1_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run_t1 = p_t1_title.add_run("TABLE I\nLITERATURE REVIEW MATRIX")
-    run_t1.bold = True
-    run_t1.font.size = Pt(10)
-
-    t1 = doc.add_table(rows=5, cols=4)
-    t1.style = 'Light Shading Accent 1' # Word built-in layout matching minimal horizontal lines
-    t1_hdr = t1.rows[0].cells
-    t1_hdr[0].text = 'Author (Year)'
-    t1_hdr[1].text = 'Methodology'
-    t1_hdr[2].text = 'Key Findings'
-    t1_hdr[3].text = 'MediWise Integration / Improvement'
-
-    lit_rows = [
-        [
-            "Tschandl et al. (2018)",
-            "HAM10000 dataset collection & SVM baseline.",
-            "10,015 pigmented skin lesion images for ML validation.",
-            "Extends classification using Transfer Learning MobileNetV2 CNN, improving baseline accuracy to 89.5%."
-        ],
-        [
-            "Sandler et al. (2018)",
-            "MobileNetV2 inverted residual block architecture.",
-            "Optimizes parameter count and memory usage for edge devices.",
-            "Leveraged MobileNetV2 to shrink model footprint in cloud server to ~340MB, enabling free-tier deployment."
-        ],
-        [
-            "Esteva et al. (2017)",
-            "Dermatologist-level skin cancer classification using deep CNNs.",
-            "Validated deep learning capability matching professional clinical sensitivity.",
-            "Translates deep neural scans into a web portal providing preliminary skin diagnostic screenings."
-        ],
-        [
-            "Chen et al. (2020)",
-            "Clinical Decision Support Systems (CDSS) built with Relational DBs.",
-            "Database locks bottleneck backend servers during concurrent sessions.",
-            "Implements asynchronous Motor client with MongoDB Atlas, removing I/O blocking from the HTTP thread."
-        ]
-    ]
-    for row_idx, data in enumerate(lit_rows):
-        row_cells = t1.rows[row_idx + 1].cells
-        for col_idx, text in enumerate(data):
-            row_cells[col_idx].text = text
 
     doc.add_page_break()
 
@@ -547,8 +566,7 @@ def build_academic_report():
     )
     doc.add_paragraph(
         "2. Backend Deployment (Render.com): The FastAPI code repository was linked directly to Render web service triggers. Render pulls "
-        "commits, builds the container environment using requirements.txt, binds the MONGO_URI string environment variable, and serves "
-        "the endpoints live under uvicorn.",
+        "commits, binds the MONGO_URI string environment variable, and serves the endpoints live under uvicorn.",
         style='List Bullet'
     )
     doc.add_paragraph(
@@ -613,7 +631,7 @@ def build_academic_report():
     output_file = 'Academic_Final_Report.docx'
     try:
         doc.save(output_file)
-        print(f"Updated Academic Report with references saved successfully as {output_file}!")
+        print(f"Updated Academic Report saved successfully as {output_file}!")
     except PermissionError:
         alternative_file = 'Academic_Final_Report_v2.docx'
         doc.save(alternative_file)
