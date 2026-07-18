@@ -156,12 +156,196 @@ async def diagnose_symptoms(request: SymptomRequest):
             "symptoms_matched": list(matched_flu),
             "protocol": "Initiate supportive care. Prescribe antivirals (e.g., Oseltamivir) within 48 hours of onset. Recommend rest and hydration."
         }
+
+    # Ebola Virus Disease (EVD) Suspected
+    elif 'high_fever' in symptoms_set and 'stomach_bleeding' in symptoms_set and ('vomiting' in symptoms_set or 'diarrhoea' in symptoms_set or 'muscle_pain' in symptoms_set):
+        matched_ebola = {'high_fever', 'stomach_bleeding'}.union({'vomiting', 'diarrhoea', 'muscle_pain'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Ebola Virus Disease (EVD Suspected)",
+            "urgency": "CRITICAL",
+            "symptoms_matched": list(matched_ebola),
+            "protocol": "CRITICAL: Strict isolation. Don full biohazard PPE. Avoid all direct contact with patient body fluids. Implement strict infection controls and report immediately."
+        }
+
+    # Meningitis Suspected (stiff neck, high fever, headache, nausea/vision disturbances)
+    elif 'stiff_neck' in symptoms_set and 'high_fever' in symptoms_set and 'headache' in symptoms_set and ('nausea' in symptoms_set or 'blurred_and_distorted_vision' in symptoms_set):
+        matched_men = {'stiff_neck', 'high_fever', 'headache'}.union({'nausea', 'blurred_and_distorted_vision'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Acute Meningitis Suspected",
+            "urgency": "CRITICAL",
+            "symptoms_matched": list(matched_men),
+            "protocol": "Urgent hospitalization required. Initiate lumbar puncture diagnostics and empiric IV antibiotics/antivirals immediately."
+        }
+
+    # Cholera Outbreak Strain Suspected (diarrhea, vomiting, severe dehydration, cramps)
+    elif 'diarrhoea' in symptoms_set and 'vomiting' in symptoms_set and 'dehydration' in symptoms_set:
+        matched_cholera = {'diarrhoea', 'vomiting', 'dehydration'}.union({'cramps'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Cholera (Outbreak Strain Suspected)",
+            "urgency": "HIGH",
+            "symptoms_matched": list(matched_cholera),
+            "protocol": "Aggressive oral/IV rehydration (ORS). Administer doxycycline or azithromycin. Isolate waste and notify public sanitation officers."
+        }
+
+    # Tetanus (Lockjaw) Suspected (muscle stiffness/pain, stiff neck, high fever, difficulty walking)
+    elif 'stiff_neck' in symptoms_set and 'muscle_pain' in symptoms_set and 'high_fever' in symptoms_set and 'painful_walking' in symptoms_set:
+        matched_tetanus = ['stiff_neck', 'muscle_pain', 'high_fever', 'painful_walking']
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Tetanus (Lockjaw Suspected)",
+            "urgency": "HIGH",
+            "symptoms_matched": matched_tetanus,
+            "protocol": "Administer human tetanus immune globulin (TIG), aggressive wound debridement, muscle relaxants, and place in quiet, dark environment."
+        }
+
+    # Diphtheria Outbreak Suspected (patches in throat, throat irritation, high fever, swelled lymph nodes)
+    elif 'patches_in_throat' in symptoms_set and 'throat_irritation' in symptoms_set and 'high_fever' in symptoms_set:
+        matched_diphtheria = {'patches_in_throat', 'throat_irritation', 'high_fever'}.union({'swelled_lymph_nodes'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Diphtheria Suspected",
+            "urgency": "HIGH",
+            "symptoms_matched": list(matched_diphtheria),
+            "protocol": "Administer diphtheria antitoxin (DAT) and erythromycin/penicillin. Secure patient airway. Strictly isolate contacts."
+        }
+
+    # Pertussis (Whooping Cough) Suspected (cough, continuous sneezing, vomiting, breathlessness)
+    elif 'cough' in symptoms_set and 'continuous_sneezing' in symptoms_set and 'vomiting' in symptoms_set and 'breathlessness' in symptoms_set:
+        matched_pertussis = ['cough', 'continuous_sneezing', 'vomiting', 'breathlessness']
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Pertussis (Whooping Cough Suspected)",
+            "urgency": "MEDIUM",
+            "symptoms_matched": matched_pertussis,
+            "protocol": "Prescribe macrolides (Azithromycin). Recommend droplet precaution quarantine. Prophylaxis for household contacts."
+        }
+
+    # Lyme Disease Suspected (rash, joint pain, fatigue, chills)
+    elif 'skin_rash' in symptoms_set and 'joint_pain' in symptoms_set and 'fatigue' in symptoms_set and 'chills' in symptoms_set:
+        matched_lyme = ['skin_rash', 'joint_pain', 'fatigue', 'chills']
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Lyme Disease Suspected",
+            "urgency": "MEDIUM",
+            "symptoms_matched": matched_lyme,
+            "protocol": "Start oral Doxycycline therapy for 10-14 days. Evaluate tick bite history and check for characteristic Erythema Migrans bullseye rash."
+        }
+
+    # Zika Virus Suspected (fever, rash, joint pain, red eyes)
+    elif 'skin_rash' in symptoms_set and 'joint_pain' in symptoms_set and 'redness_of_eyes' in symptoms_set and ('high_fever' in symptoms_set or 'mild_fever' in symptoms_set):
+        matched_zika = {'skin_rash', 'joint_pain', 'redness_of_eyes'}.union({'high_fever', 'mild_fever'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Zika Virus Suspected",
+            "urgency": "MEDIUM",
+            "symptoms_matched": list(matched_zika),
+            "protocol": "Recommend rest, hydration, and acetaminophen. Strictly avoid NSAIDs. Instruct pregnant patients on microcephaly risks."
+        }
+
+    # Acute Severe Asthma Attack (breathlessness, cough, chest pain, but NO fever)
+    elif 'breathlessness' in symptoms_set and 'cough' in symptoms_set and 'chest_pain' in symptoms_set and 'high_fever' not in symptoms_set and 'mild_fever' not in symptoms_set:
+        matched_asthma = ['breathlessness', 'cough', 'chest_pain']
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Acute Asthma Exacerbation Suspected",
+            "urgency": "HIGH",
+            "symptoms_matched": matched_asthma,
+            "protocol": "Administer short-acting beta-agonists (SABA) via nebulizer/inhaler and oral systemic corticosteroids immediately. Monitor O2 saturation."
+        }
+
+    # Heat Stroke (high fever, dizziness, headache, nausea, but NO sweating/dry skin)
+    elif 'high_fever' in symptoms_set and 'dizziness' in symptoms_set and 'headache' in symptoms_set and 'nausea' in symptoms_set and 'sweating' not in symptoms_set:
+        matched_heatstroke = ['high_fever', 'dizziness', 'headache', 'nausea']
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Exertional/Classical Heat Stroke Suspected",
+            "urgency": "CRITICAL",
+            "symptoms_matched": matched_heatstroke,
+            "protocol": "EMERGENCY: Initiate rapid evaporative cooling, ice packs, and cold water immersion. Administer IV fluids and monitor core body temperature."
+        }
+        
+    # --- General Practice Clinical Specialty System Triage Router ---
+    # This acts as an open-world fallback layer to classify symptom presentations across all human organs/systems
+    general_triage_routing = None
+    
+    system_mappings = [
+        {
+            "system": "Cardiovascular & Circulatory System",
+            "specialty": "Cardiologist",
+            "markers": {'chest_pain', 'fast_heart_rate', 'palpitations', 'swollen_legs', 'dizziness', 'breathlessness'},
+            "notes": "Patient presents with indicators of circulatory or cardiac strain. Schedule an urgent Cardiology consultation. Recommended diagnostics include 12-lead ECG, troponin markers, and echocardiogram."
+        },
+        {
+            "system": "Central & Peripheral Nervous System",
+            "specialty": "Neurologist",
+            "markers": {'headache', 'dizziness', 'altered_sensorium', 'loss_of_balance', 'unsteadiness', 'slurred_speech', 'weakness_of_one_body_side'},
+            "notes": "Symptoms indicate central nervous system pathway involvement. Recommend specialized Neurological evaluation to rule out cerebrovascular events, migraine variations, or motor path disruptions."
+        },
+        {
+            "system": "Endocrine & Metabolic Regulation",
+            "specialty": "Endocrinologist",
+            "markers": {'weight_gain', 'weight_loss', 'excessive_hunger', 'increased_appetite', 'polyuria', 'lethargy', 'irregular_sugar_level', 'enlarged_thyroid'},
+            "notes": "Patient presents with metabolic, fluid balance, or hormone regulation indicators. Referral to Endocrinology recommended. Schedule fasting blood glucose, HbA1c, and thyroid panel (TSH, Free T4)."
+        },
+        {
+            "system": "Musculoskeletal & Autoimmune Pathways",
+            "specialty": "Rheumatologist / Orthopedic Specialist",
+            "markers": {'joint_pain', 'muscle_weakness', 'stiff_neck', 'swelling_joints', 'movement_stiffness', 'knee_pain', 'hip_joint_pain'},
+            "notes": "Symptoms align with inflammatory, mechanical, or autoimmune joint/muscle conditions. Refer to Rheumatology/Orthopedics. Recommended screenings: rheumatoid factor (RF), anti-CCP, and joint X-rays."
+        },
+        {
+            "system": "Gastrointestinal & Hepato-Biliary Tract",
+            "specialty": "Gastroenterologist",
+            "markers": {'stomach_pain', 'acidity', 'vomiting', 'indigestion', 'abdominal_pain', 'diarrhoea', 'constipation', 'yellowish_skin', 'dark_urine', 'loss_of_appetite'},
+            "notes": "Indicators point to stomach, intestinal, or biliary dysfunction. Schedule Gastroenterology follow-up. Recommended next steps: LFTs, abdominal ultrasound, or endoscopy."
+        },
+        {
+            "system": "Dermatological & Integumentary Tissues",
+            "specialty": "Dermatologist",
+            "markers": {'itching', 'skin_rash', 'nodal_skin_eruptions', 'pus_filled_pimples', 'blackheads', 'scurring', 'skin_peeling', 'blister'},
+            "notes": "Patient presents with surface tissue, follicular, or skin barrier lesions. Refer to Dermatology for physical dermoscopic exam, biopsy, or topical steroid/antibiotic management."
+        },
+        {
+            "system": "Renal & Lower Urinary Tract",
+            "specialty": "Urologist / Nephrologist",
+            "markers": {'burning_micturition', 'spotting__urination', 'yellow_urine', 'bladder_discomfort', 'foul_smell_of_urine', 'continuous_feel_of_urine'},
+            "notes": "Clinical indicators represent urinary excretion path distress. Refer to Urology/Nephrology. Urgently schedule urinalysis (UA) and urine culture to isolate bacterial pathogens."
+        },
+        {
+            "system": "Pulmonary & Respiratory Airways",
+            "specialty": "Pulmonologist",
+            "markers": {'continuous_sneezing', 'cough', 'breathlessness', 'phlegm', 'throat_irritation', 'runny_nose', 'congestion', 'chest_pain'},
+            "notes": "Symptoms suggest upper or lower respiratory airway inflammation. Schedule Pulmonary evaluation. Check pulse oximetry, perform lung auscultation, and consider spirometry screenings."
+        }
+    ]
+    
+    # Check for strongest matching system
+    best_match = None
+    max_matched_count = 0
+    
+    for mapping in system_mappings:
+        matched_markers = mapping["markers"].intersection(symptoms_set)
+        if len(matched_markers) > max_matched_count:
+            max_matched_count = len(matched_markers)
+            best_match = mapping
+            
+    if best_match and max_matched_count >= 1:
+        general_triage_routing = {
+            "system": best_match["system"],
+            "specialty": best_match["specialty"],
+            "severity": "HIGH" if max_matched_count >= 3 else "MEDIUM",
+            "notes": best_match["notes"]
+        }
         
     result = {
         "prediction": prediction,
         "confidence": confidence,
         "all_probabilities": prob_dict,
-        "epidemic_alert": epidemic_alert
+        "epidemic_alert": epidemic_alert,
+        "general_triage_routing": general_triage_routing
     }
     
     # Save to MongoDB

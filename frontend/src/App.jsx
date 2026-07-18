@@ -81,6 +81,8 @@ function App() {
   const [showSymptomDropdown, setShowSymptomDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking');
+  const [epidemicAlert, setEpidemicAlert] = useState(null);
+  const [generalTriage, setGeneralTriage] = useState(null);
 
   // Apply theme class to document body
   useEffect(() => {
@@ -242,6 +244,8 @@ function App() {
   const runAnalysis = async () => {
     setErrorMessage(null);
     setResults(null);
+    setEpidemicAlert(null);
+    setGeneralTriage(null);
     
     if (activeTab === 'symptoms') {
       if (selectedSymptoms.length === 0) {
@@ -274,6 +278,8 @@ function App() {
             .slice(0, 3);
             
         setResults(probs);
+        setEpidemicAlert(data.epidemic_alert);
+        setGeneralTriage(data.general_triage_routing);
       } else {
         if (skinImages.length === 0) return;
         
@@ -295,6 +301,8 @@ function App() {
             .slice(0, 3);
             
         setResults(probs);
+        setEpidemicAlert(null);
+        setGeneralTriage(null);
       }
     } catch (error) {
       console.error("Diagnosis Error:", error);
@@ -948,6 +956,37 @@ function App() {
                 <CheckCircle2 color={results ? 'var(--success)' : 'var(--text-light)'} size={20} />
                 Live Diagnostic Metrics
               </h3>
+
+              {/* Epidemic Alert Notification Banner */}
+              {epidemicAlert && epidemicAlert.matched && (
+                <div style={{
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  border: '1.5px solid #ef4444',
+                  borderRadius: '10px',
+                  padding: '1rem',
+                  marginBottom: '1.5rem',
+                  boxSizing: 'border-box'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                    <AlertTriangle size={18} />
+                    High-Priority Epidemic Alert
+                  </div>
+                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)' }}>
+                    {epidemicAlert.disease}
+                  </h4>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                    <strong>Protocol:</strong> {epidemicAlert.protocol}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginRight: '0.25rem' }}>Matching symptoms:</span>
+                    {epidemicAlert.symptoms_matched.map((s, i) => (
+                      <span key={i} style={{ fontSize: '0.7rem', backgroundColor: '#ef4444', color: '#fff', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 600 }}>
+                        {s.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {isAnalyzing ? (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', color: 'var(--text-light)' }}>
@@ -1030,12 +1069,28 @@ function App() {
                       <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--success)' }}></span>
                       Recommended Referral Routing
                     </div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
-                      Schedule consultation: <span style={{ color: 'var(--secondary)' }}>{getRecommendedSpecialist(results[0].name)}</span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', lineHeight: '1.4' }}>
-                      Based on deep learning probability mappings, the patient referral route is directed to this clinical specialty.
-                    </div>
+                    {generalTriage ? (
+                      <>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
+                          System Match: <span style={{ color: 'var(--secondary)' }}>{generalTriage.system}</span>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text)', margin: '0.15rem 0' }}>
+                          Refer to: <span style={{ color: 'var(--primary)' }}>{generalTriage.specialty}</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', lineHeight: '1.4' }}>
+                          {generalTriage.notes}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
+                          Schedule consultation: <span style={{ color: 'var(--secondary)' }}>{getRecommendedSpecialist(results[0].name)}</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', lineHeight: '1.4' }}>
+                          Based on deep learning probability mappings, the patient referral route is directed to this clinical specialty.
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Action Print Button */}

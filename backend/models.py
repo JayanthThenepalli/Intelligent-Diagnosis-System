@@ -9,3 +9,4 @@ class DiagnosticResponse(BaseModel):
     confidence: float
     all_probabilities: dict
     epidemic_alert: Optional[Dict[str, Any]] = None
+    general_triage_routing: Optional[Dict[str, Any]] = None
