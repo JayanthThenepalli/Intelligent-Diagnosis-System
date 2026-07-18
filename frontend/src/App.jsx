@@ -21,6 +21,33 @@ import './index.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
+const ALL_SYMPTOMS = [
+  'itching', 'skin_rash', 'nodal_skin_eruptions', 'continuous_sneezing', 'shivering', 'chills', 'joint_pain', 
+  'stomach_pain', 'acidity', 'ulcers_on_tongue', 'muscle_wasting', 'vomiting', 'burning_micturition', 
+  'spotting__urination', 'fatigue', 'weight_gain', 'anxiety', 'cold_hands_and_feets', 'mood_swings', 
+  'weight_loss', 'restlessness', 'lethargy', 'patches_in_throat', 'irregular_sugar_level', 'cough', 
+  'high_fever', 'sunken_eyes', 'breathlessness', 'sweating', 'dehydration', 'indigestion', 'headache', 
+  'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'pain_behind_the_eyes', 'back_pain', 
+  'constipation', 'abdominal_pain', 'diarrhoea', 'mild_fever', 'yellow_urine', 'yellowing_of_eyes', 
+  'acute_liver_failure', 'fluid_overload', 'swelling_of_stomach', 'swelled_lymph_nodes', 'malaise', 
+  'blurred_and_distorted_vision', 'phlegm', 'throat_irritation', 'redness_of_eyes', 'sinus_pressure', 
+  'runny_nose', 'congestion', 'chest_pain', 'weakness_in_limbs', 'fast_heart_rate', 'pain_during_bowel_movements', 
+  'pain_in_anal_region', 'bloody_stool', 'irritation_in_anus', 'neck_pain', 'dizziness', 'cramps', 
+  'bruising', 'obesity', 'swollen_legs', 'swollen_blood_vessels', 'puffy_face_and_eyes', 'enlarged_thyroid', 
+  'brittle_nails', 'swollen_extremeties', 'excessive_hunger', 'extra_marital_contacts', 'drying_and_tingling_lips', 
+  'slurred_speech', 'knee_pain', 'hip_joint_pain', 'muscle_weakness', 'stiff_neck', 'swelling_joints', 
+  'movement_stiffness', 'spinning_movements', 'loss_of_balance', 'unsteadiness', 'weakness_of_one_body_side', 
+  'loss_of_smell', 'bladder_discomfort', 'foul_smell_of_urine', 'continuous_feel_of_urine', 'passage_of_gases', 
+  'internal_itching', 'toxic_look_(typhos)', 'depression', 'irritability', 'muscle_pain', 'altered_sensorium', 
+  'red_spots_over_body', 'belly_pain', 'abnormal_menstruation', 'dischromic__patches', 'watering_from_eyes', 
+  'increased_appetite', 'polyuria', 'family_history', 'mucoid_sputum', 'rusty_sputum', 'lack_of_concentration', 
+  'visual_disturbances', 'receiving_blood_transfusion', 'receiving_unsterile_injections', 'coma', 
+  'stomach_bleeding', 'distention_of_abdomen', 'history_of_alcohol_consumption', 'fluid_overload', 
+  'blood_in_sputum', 'prominent_veins_on_calf', 'palpitations', 'painful_walking', 'pus_filled_pimples', 
+  'blackheads', 'scurring', 'skin_peeling', 'silver_like_dusting', 'small_dents_in_nails', 'inflammatory_nails', 
+  'blister', 'red_sore_around_nose', 'yellow_crust_ooze', 'nose_bleeding', 'ear_bleeding'
+];
+
 function App() {
   const [activeTab, setActiveTab] = useState('symptoms');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
@@ -49,7 +76,9 @@ function App() {
   // State for diagnostics execution
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
-  const [symptomText, setSymptomText] = useState("skin rash, itching, nodal skin eruptions, nose_bleeding");
+  const [selectedSymptoms, setSelectedSymptoms] = useState(["skin_rash", "itching", "nodal_skin_eruptions", "nose_bleeding"]);
+  const [symptomSearch, setSymptomSearch] = useState("");
+  const [showSymptomDropdown, setShowSymptomDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking');
 
@@ -215,8 +244,8 @@ function App() {
     setResults(null);
     
     if (activeTab === 'symptoms') {
-      if (!symptomText.trim()) {
-        setErrorMessage("Please enter at least one symptom to run the diagnostics.");
+      if (selectedSymptoms.length === 0) {
+        setErrorMessage("Please select at least one symptom to run the diagnostics.");
         return;
       }
     } else {
@@ -230,12 +259,10 @@ function App() {
     
     try {
       if (activeTab === 'symptoms') {
-        const symptomArray = symptomText.split(',').map(s => s.trim()).filter(s => s);
-        
         const response = await fetch(`${API_BASE_URL}/api/diagnose/symptoms`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ symptoms: symptomArray })
+          body: JSON.stringify({ symptoms: selectedSymptoms })
         });
         
         if (!response.ok) throw new Error("Server error");
@@ -252,7 +279,7 @@ function App() {
         
         const formData = new FormData();
         formData.append('file', skinImages[0]);
-        formData.append('symptoms', symptomText);
+        formData.append('symptoms', selectedSymptoms.join(', '));
         
         const response = await fetch(`${API_BASE_URL}/api/diagnose/skin-lesion`, {
           method: 'POST',
@@ -678,15 +705,146 @@ function App() {
                     Symptom Triage Checker
                   </h2>
                   
-                  <div className="form-group">
-                    <label className="form-label">Patient Symptoms (Comma-separated values)</label>
-                    <textarea 
-                      className="form-input" 
-                      rows="6" 
-                      placeholder="e.g., skin rash, itching, nodal skin eruptions, nose_bleeding"
-                      value={symptomText}
-                      onChange={(e) => setSymptomText(e.target.value)}
-                    ></textarea>
+                  <div className="form-group" style={{ position: 'relative' }}>
+                    <label className="form-label">Select Patient Symptoms</label>
+                    
+                    {/* Selected Tags container */}
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem',
+                      padding: '0.75rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: '10px',
+                      backgroundColor: 'var(--input-bg)',
+                      minHeight: '48px',
+                      boxSizing: 'border-box',
+                      cursor: 'text'
+                    }} onClick={() => document.getElementById('symptom-search-input').focus()}>
+                      {selectedSymptoms.map((sym, idx) => (
+                        <span key={idx} style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          padding: '0.25rem 0.6rem',
+                          borderRadius: '6px',
+                          backgroundColor: 'var(--primary)',
+                          color: '#fff',
+                          fontSize: '0.8rem',
+                          fontWeight: 600
+                        }}>
+                          {sym.replace(/_/g, ' ')}
+                          <button 
+                            type="button" 
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'rgba(255,255,255,0.8)',
+                              padding: 0,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSymptoms(prev => prev.filter((_, i) => i !== idx));
+                            }}
+                          >
+                            <X size={12} />
+                          </button>
+                        </span>
+                      ))}
+                      
+                      <input 
+                        id="symptom-search-input"
+                        type="text"
+                        placeholder={selectedSymptoms.length === 0 ? "Search and select symptoms..." : "Add symptom..."}
+                        value={symptomSearch}
+                        onChange={(e) => {
+                          setSymptomSearch(e.target.value);
+                          setShowSymptomDropdown(true);
+                        }}
+                        onFocus={() => setShowSymptomDropdown(true)}
+                        style={{
+                          border: 'none',
+                          outline: 'none',
+                          background: 'transparent',
+                          color: 'var(--text)',
+                          fontSize: '0.85rem',
+                          flex: 1,
+                          minWidth: '120px'
+                        }}
+                      />
+                    </div>
+
+                    {/* Dropdown list */}
+                    {showSymptomDropdown && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '10px',
+                        marginTop: '0.35rem',
+                        maxHeight: '220px',
+                        overflowY: 'auto',
+                        zIndex: 50,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      }}>
+                        {ALL_SYMPTOMS.filter(sym => 
+                          sym.replace(/_/g, ' ').toLowerCase().includes(symptomSearch.toLowerCase()) &&
+                          !selectedSymptoms.includes(sym)
+                        ).length > 0 ? (
+                          ALL_SYMPTOMS.filter(sym => 
+                            sym.replace(/_/g, ' ').toLowerCase().includes(symptomSearch.toLowerCase()) &&
+                            !selectedSymptoms.includes(sym)
+                          ).map((sym, idx) => (
+                            <div 
+                              key={idx}
+                              onClick={() => {
+                                setSelectedSymptoms(prev => [...prev, sym]);
+                                setSymptomSearch("");
+                                setShowSymptomDropdown(false);
+                              }}
+                              style={{
+                                padding: '0.65rem 0.85rem',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                color: 'var(--text)',
+                                borderBottom: '1px solid var(--border)',
+                                transition: 'background-color 0.2s'
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
+                              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                              {sym.replace(/_/g, ' ')}
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: '0.85rem', fontSize: '0.85rem', color: 'var(--text-light)', textAlign: 'center' }}>
+                            No symptoms match search query
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Click outside to close dropdown */}
+                    {showSymptomDropdown && (
+                      <div 
+                        onClick={() => setShowSymptomDropdown(false)}
+                        style={{
+                          position: 'fixed',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          zIndex: 40
+                        }}
+                      />
+                    )}
+                    
                     <p style={{fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '0.5rem'}}>
                       The Keras ANN evaluates physiological symptoms (including added parameters like `nose_bleeding` and `ear_bleeding`) and outputs diagnostic probabilities.
                     </p>
