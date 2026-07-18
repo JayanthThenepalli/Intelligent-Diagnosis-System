@@ -117,10 +117,51 @@ async def diagnose_symptoms(request: SymptomRequest):
     prediction = str(symptom_classes[top_idx])
     confidence = float(probabilities[top_idx])
     
+    # --- Socially Critical Triage Override Layer (Dangerous Epidemic Detection) ---
+    symptoms_set = set(s.strip().replace(" ", "_").lower() for s in request.symptoms)
+    epidemic_alert = None
+    
+    # COVID-19 detection (high fever, cough, breathlessness, loss of smell, fatigue)
+    covid_markers = {'cough', 'high_fever', 'breathlessness', 'loss_of_smell'}
+    matched_covid = covid_markers.intersection(symptoms_set)
+    if len(matched_covid) >= 3:
+        if 'fatigue' in symptoms_set:
+            matched_covid.add('fatigue')
+        epidemic_alert = {
+            "matched": True,
+            "disease": "COVID-19 (SARS-CoV-2 Suspected)",
+            "urgency": "HIGH",
+            "symptoms_matched": list(matched_covid),
+            "protocol": "Isolate patient immediately. Administer rapid antigen or PCR test. Maintain negative pressure ventilation and report to public health authority."
+        }
+        
+    # Mpox detection (skin rash, high fever, swelled lymph nodes, muscle pain, blister)
+    elif 'skin_rash' in symptoms_set and 'swelled_lymph_nodes' in symptoms_set and ('high_fever' in symptoms_set or 'muscle_pain' in symptoms_set or 'blister' in symptoms_set):
+        matched_mpox = {'skin_rash', 'swelled_lymph_nodes'}.union({'high_fever', 'muscle_pain', 'blister'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Mpox (Monkeypox Suspected)",
+            "urgency": "HIGH",
+            "symptoms_matched": list(matched_mpox),
+            "protocol": "Isolate patient in single room. Enforce contact and airborne precautions. Avoid direct contact with lesion fluids. Notify local health department."
+        }
+
+    # Influenza epidemic strain (high fever, cough, muscle pain, chills, headache)
+    elif 'high_fever' in symptoms_set and 'cough' in symptoms_set and 'muscle_pain' in symptoms_set and ('chills' in symptoms_set or 'headache' in symptoms_set):
+        matched_flu = {'high_fever', 'cough', 'muscle_pain'}.union({'chills', 'headache'}.intersection(symptoms_set))
+        epidemic_alert = {
+            "matched": True,
+            "disease": "Severe Influenza (Flu Epidemic Strain Suspected)",
+            "urgency": "MEDIUM",
+            "symptoms_matched": list(matched_flu),
+            "protocol": "Initiate supportive care. Prescribe antivirals (e.g., Oseltamivir) within 48 hours of onset. Recommend rest and hydration."
+        }
+        
     result = {
         "prediction": prediction,
         "confidence": confidence,
-        "all_probabilities": prob_dict
+        "all_probabilities": prob_dict,
+        "epidemic_alert": epidemic_alert
     }
     
     # Save to MongoDB
