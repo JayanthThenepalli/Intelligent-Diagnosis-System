@@ -121,12 +121,10 @@ async def diagnose_symptoms(request: SymptomRequest):
     symptoms_set = set(s.strip().replace(" ", "_").lower() for s in request.symptoms)
     epidemic_alert = None
     
-    # COVID-19 detection (high fever, cough, breathlessness, loss of smell, fatigue)
-    covid_markers = {'cough', 'high_fever', 'breathlessness', 'loss_of_smell'}
+    # COVID-19 detection (high fever, cough, breathlessness, loss of smell, fatigue, throat_irritation, runny_nose, muscle_pain, headache)
+    covid_markers = {'cough', 'high_fever', 'breathlessness', 'loss_of_smell', 'fatigue', 'throat_irritation', 'runny_nose', 'muscle_pain', 'headache'}
     matched_covid = covid_markers.intersection(symptoms_set)
-    if len(matched_covid) >= 3:
-        if 'fatigue' in symptoms_set:
-            matched_covid.add('fatigue')
+    if ('cough' in symptoms_set and 'high_fever' in symptoms_set and len(matched_covid) >= 4) or ('breathlessness' in symptoms_set and len(matched_covid) >= 3):
         epidemic_alert = {
             "matched": True,
             "disease": "COVID-19 (SARS-CoV-2 Suspected)",
@@ -134,6 +132,10 @@ async def diagnose_symptoms(request: SymptomRequest):
             "symptoms_matched": list(matched_covid),
             "protocol": "Isolate patient immediately. Administer rapid antigen or PCR test. Maintain negative pressure ventilation and report to public health authority."
         }
+        # Intercept primary prediction to prioritize epidemic threat safety
+        prediction = "COVID-19 (Suspected Outbreak Strain)"
+        confidence = 0.95
+        prob_dict = {"COVID-19 (Suspected Outbreak Strain)": 0.95, "Common Cold": 0.03, "Severe Influenza": 0.02}
         
     # Mpox detection (skin rash, high fever, swelled lymph nodes, muscle pain, blister)
     elif 'skin_rash' in symptoms_set and 'swelled_lymph_nodes' in symptoms_set and ('high_fever' in symptoms_set or 'muscle_pain' in symptoms_set or 'blister' in symptoms_set):
