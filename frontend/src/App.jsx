@@ -90,6 +90,77 @@ function App() {
   const [patientGender, setPatientGender] = useState("");
   const [patientBloodGroup, setPatientBloodGroup] = useState("");
   const [patientHeight, setPatientHeight] = useState("");
+  const [patientWeight, setPatientWeight] = useState("");
+  const [patientAllergies, setPatientAllergies] = useState("");
+  const [patientMedicalHistory, setPatientMedicalHistory] = useState("");
+  const [savedPatientsList, setSavedPatientsList] = useState([]);
+  const [activePatient, setActivePatient] = useState(null);
+  const [patientSearchQuery, setPatientSearchQuery] = useState("");
+
+  const fetchSavedPatients = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/patients`);
+      if (response.ok) {
+        const data = await response.json();
+        setSavedPatientsList(data.data || []);
+      }
+    } catch (e) {
+      console.error("Failed to load patient profiles:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedPatients();
+  }, []);
+
+  const saveProfileToDatabase = async () => {
+    if (!patientName) {
+      setErrorMessage("Patient Name / ID is required to create a profile.");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/patients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patient_name: patientName,
+          age: patientAge ? parseInt(patientAge) : 0,
+          gender: patientGender || "Other",
+          blood_group: patientBloodGroup || "O+",
+          height: patientHeight ? parseFloat(patientHeight) : 0.0,
+          weight: patientWeight ? parseFloat(patientWeight) : null,
+          allergies: patientAllergies || "",
+          medical_history: patientMedicalHistory || ""
+        })
+      });
+      if (response.ok) {
+        await fetchSavedPatients();
+        const newPatient = {
+          patient_name: patientName,
+          age: patientAge,
+          gender: patientGender,
+          blood_group: patientBloodGroup,
+          height: patientHeight,
+          weight: patientWeight,
+          allergies: patientAllergies,
+          medical_history: patientMedicalHistory
+        };
+        setActivePatient(newPatient);
+        setPatientName("");
+        setPatientAge("");
+        setPatientGender("");
+        setPatientBloodGroup("");
+        setPatientHeight("");
+        setPatientWeight("");
+        setPatientAllergies("");
+        setPatientMedicalHistory("");
+        alert("Patient profile saved successfully!");
+      }
+    } catch (e) {
+      console.error(e);
+      setErrorMessage("Failed to write patient profile to remote database.");
+    }
+  };
 
   // Apply theme class to document body
   useEffect(() => {
@@ -275,11 +346,11 @@ function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             symptoms: selectedSymptoms,
-            patient_name: patientName || "Anonymous",
-            age: patientAge ? parseInt(patientAge) : null,
-            gender: patientGender || null,
-            blood_group: patientBloodGroup || null,
-            height: patientHeight ? parseFloat(patientHeight) : null
+            patient_name: activePatient ? activePatient.patient_name : "Anonymous",
+            age: activePatient && activePatient.age ? parseInt(activePatient.age) : null,
+            gender: activePatient ? activePatient.gender : null,
+            blood_group: activePatient ? activePatient.blood_group : null,
+            height: activePatient && activePatient.height ? parseFloat(activePatient.height) : null
           })
         });
         
@@ -300,11 +371,11 @@ function App() {
         const formData = new FormData();
         formData.append('file', skinImages[0]);
         formData.append('symptoms', selectedSymptoms.join(', '));
-        formData.append('patient_name', patientName || "Anonymous");
-        if (patientAge) formData.append('age', patientAge);
-        if (patientGender) formData.append('gender', patientGender);
-        if (patientBloodGroup) formData.append('blood_group', patientBloodGroup);
-        if (patientHeight) formData.append('height', patientHeight);
+        formData.append('patient_name', activePatient ? activePatient.patient_name : "Anonymous");
+        if (activePatient && activePatient.age) formData.append('age', activePatient.age);
+        if (activePatient && activePatient.gender) formData.append('gender', activePatient.gender);
+        if (activePatient && activePatient.blood_group) formData.append('blood_group', activePatient.blood_group);
+        if (activePatient && activePatient.height) formData.append('height', activePatient.height);
         
         const response = await fetch(`${API_BASE_URL}/api/diagnose/skin-lesion`, {
           method: 'POST',
@@ -637,7 +708,37 @@ function App() {
             <ImageIcon size={18} />
             Image Scanner
           </button>
+          <button 
+            className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={() => {setActiveTab('profile'); setResults(null); setErrorMessage(null);}}
+          >
+            <User size={18} />
+            Patient Profile
+          </button>
 
+          {activePatient && (
+            <div style={{
+              marginTop: '1.25rem',
+              padding: '0.75rem 0.85rem',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(16, 185, 129, 0.08)',
+              border: '1px dashed rgba(16, 185, 129, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.2rem',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Active Patient
+              </div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {activePatient.patient_name}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>
+                {activePatient.age} yrs • {activePatient.gender} • {activePatient.blood_group}
+              </div>
+            </div>
+          )}
 
           <button className="theme-toggle-btn" onClick={toggleTheme} style={{marginTop: '1.5rem', width: '100%', justifyContent: 'center'}}>
             {theme === 'dark' ? (
@@ -652,98 +753,6 @@ function App() {
               </>
             )}
           </button>
-          
-          {/* Patient Demographics Profile (Sidebar Version) */}
-          <div style={{
-            marginTop: '1.5rem',
-            padding: '1rem',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid var(--border)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.65rem'
-          }}>
-            <h3 style={{ fontSize: '0.8rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              <User size={13} color="var(--primary)" />
-              Patient Profile
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div>
-                <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Patient Name / ID</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="e.g. PT-88102"
-                  value={patientName}
-                  onChange={(e) => setPatientName(e.target.value)}
-                  style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
-                />
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div>
-                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Age (Years)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    placeholder="e.g. 45"
-                    value={patientAge}
-                    onChange={(e) => setPatientAge(e.target.value)}
-                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2/rem', display: 'block' }}>Gender</label>
-                  <select 
-                    className="form-input" 
-                    value={patientGender}
-                    onChange={(e) => setPatientGender(e.target.value)}
-                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box', appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
-                  >
-                    <option value="">Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div>
-                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Blood Group</label>
-                  <select 
-                    className="form-input" 
-                    value={patientBloodGroup}
-                    onChange={(e) => setPatientBloodGroup(e.target.value)}
-                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box', appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
-                  >
-                    <option value="">Blood</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Height (cm)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    placeholder="e.g. 175"
-                    value={patientHeight}
-                    onChange={(e) => setPatientHeight(e.target.value)}
-                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* User Profile Card and Sign Out */}
           <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
@@ -817,7 +826,132 @@ function App() {
           <div className="split-layout">
             {/* Left Column: Form Inputs */}
             <div className="card">
-              {activeTab === 'symptoms' ? (
+              {activeTab === 'profile' && (
+                <div>
+                  <h2 className="card-title">
+                    <User className="logo-icon" size={20} color="var(--primary)" />
+                    Patient Profile Registry
+                  </h2>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Patient Name / ID</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        placeholder="e.g. PT-88102 (John Doe)"
+                        value={patientName}
+                        onChange={(e) => setPatientName(e.target.value)}
+                      />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Age (Years)</label>
+                        <input 
+                          type="number" 
+                          className="form-input" 
+                          placeholder="e.g. 45"
+                          value={patientAge}
+                          onChange={(e) => setPatientAge(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Gender</label>
+                        <select 
+                          className="form-input" 
+                          value={patientGender}
+                          onChange={(e) => setPatientGender(e.target.value)}
+                          style={{ appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Blood Group</label>
+                        <select 
+                          className="form-input" 
+                          value={patientBloodGroup}
+                          onChange={(e) => setPatientBloodGroup(e.target.value)}
+                          style={{ appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
+                        >
+                          <option value="">Select Blood</option>
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Height (cm)</label>
+                        <input 
+                          type="number" 
+                          className="form-input" 
+                          placeholder="e.g. 175"
+                          value={patientHeight}
+                          onChange={(e) => setPatientHeight(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className="form-group" style={{ margin: 0, gridColumn: 'span 2' }}>
+                        <label className="form-label">Weight (kg)</label>
+                        <input 
+                          type="number" 
+                          className="form-input" 
+                          placeholder="e.g. 70"
+                          value={patientWeight}
+                          onChange={(e) => setPatientWeight(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Allergies</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        placeholder="e.g. Penicillin, Peanuts"
+                        value={patientAllergies}
+                        onChange={(e) => setPatientAllergies(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Medical History Notes</label>
+                      <textarea 
+                        className="form-input" 
+                        placeholder="e.g. Type-2 Diabetes, Asthma exacerbation history"
+                        value={patientMedicalHistory}
+                        onChange={(e) => setPatientMedicalHistory(e.target.value)}
+                        style={{ height: '80px', resize: 'none', fontFamily: 'inherit' }}
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    className="btn-primary" 
+                    onClick={saveProfileToDatabase}
+                    style={{ width: '100%' }}
+                  >
+                    <span>Save Patient Profile</span>
+                    <CheckCircle2 size={18} />
+                  </button>
+                </div>
+              )}
+
+              {activeTab === 'symptoms' && (
                 <div>
                   <h2 className="card-title">
                     <FileText className="logo-icon" size={20} />
@@ -1063,10 +1197,215 @@ function App() {
 
             {/* Right Column: Diagnostic Results Dashboard */}
             <div className="results-panel" style={{ minHeight: '520px', display: 'flex', flexDirection: 'column' }}>
-              <h3 className="results-header-text" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-                <CheckCircle2 color={results ? 'var(--success)' : 'var(--text-light)'} size={20} />
-                Live Diagnostic Metrics
-              </h3>
+              {activeTab === 'profile' ? (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <h3 className="results-header-text" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+                    <User size={20} color="var(--primary)" />
+                    Patient Registry & Integrations
+                  </h3>
+                  
+                  {/* Active Patient Details */}
+                  {activePatient ? (
+                    <div style={{
+                      padding: '1rem',
+                      borderRadius: '10px',
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      border: '1.5px solid var(--success)',
+                      marginBottom: '1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Linked Diagnosis Profile
+                        </span>
+                        <button 
+                          onClick={() => setActivePatient(null)}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                        >
+                          Unlink
+                        </button>
+                      </div>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text)' }}>
+                        {activePatient.patient_name}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', lineHeight: '1.4' }}>
+                        <strong>Age:</strong> {activePatient.age} yrs &nbsp;|&nbsp; <strong>Gender:</strong> {activePatient.gender} &nbsp;|&nbsp; <strong>Blood Group:</strong> {activePatient.blood_group}<br />
+                        <strong>Height:</strong> {activePatient.height} cm &nbsp;|&nbsp; <strong>Weight:</strong> {activePatient.weight ? `${activePatient.weight} kg` : 'N/A'}<br />
+                        <strong>Allergies:</strong> {activePatient.allergies || "None declared"}<br />
+                        <strong>Medical History:</strong> {activePatient.medical_history || "No historical notes"}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{
+                      padding: '1rem',
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px dashed var(--border)',
+                      marginBottom: '1.25rem',
+                      textAlign: 'center',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-light)',
+                      boxSizing: 'border-box'
+                    }}>
+                      No active patient linked. Select a patient card below to run diagnostics.
+                    </div>
+                  )}
+
+                  {/* Patient Search & Directory list */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="🔍 Search patient directory..."
+                      value={patientSearchQuery}
+                      onChange={(e) => setPatientSearchQuery(e.target.value)}
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+                    />
+
+                    <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingRight: '0.25rem' }}>
+                      {savedPatientsList
+                        .filter(p => p.patient_name.toLowerCase().includes(patientSearchQuery.toLowerCase()))
+                        .map((pat, idx) => (
+                          <div 
+                            key={idx}
+                            style={{
+                              padding: '0.85rem',
+                              borderRadius: '8px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                              border: '1px solid var(--border)',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {pat.patient_name}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
+                                {pat.age} yrs • {pat.gender} • {pat.blood_group}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.35rem' }}>
+                              <button 
+                                onClick={() => {
+                                  setPatientName(pat.patient_name);
+                                  setPatientAge(pat.age);
+                                  setPatientGender(pat.gender);
+                                  setPatientBloodGroup(pat.blood_group);
+                                  setPatientHeight(pat.height);
+                                  setPatientWeight(pat.weight || "");
+                                  setPatientAllergies(pat.allergies || "");
+                                  setPatientMedicalHistory(pat.medical_history || "");
+                                }}
+                                style={{
+                                  padding: '0.35rem 0.6rem',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 700,
+                                  borderRadius: '6px',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid var(--border)',
+                                  color: 'var(--text)',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setActivePatient(pat);
+                                  alert(`Loaded ${pat.patient_name} as active diagnostics profile!`);
+                                }}
+                                style={{
+                                  padding: '0.35rem 0.6rem',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 700,
+                                  borderRadius: '6px',
+                                  backgroundColor: 'var(--primary)',
+                                  border: 'none',
+                                  color: '#fff',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Link
+                              </button>
+                            </div>
+                          </div>
+                      ))}
+                      {savedPatientsList.filter(p => p.patient_name.toLowerCase().includes(patientSearchQuery.toLowerCase())).length === 0 && (
+                        <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-light)', padding: '1rem' }}>
+                          No patient profiles match query
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Future Purposes Integration Options */}
+                  <div style={{
+                    marginTop: 'auto',
+                    paddingTop: '1.25rem',
+                    borderTop: '1px solid var(--border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.65rem'
+                  }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      🔌 FUTURE EHR INTEGRATION GATEWAYS
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <button 
+                        onClick={() => alert("HL7 FHIR Integration: Connecting to EHR server gateway... Metadata sync initialized.")}
+                        style={{
+                          padding: '0.65rem',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          color: 'var(--text)',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem'
+                        }}
+                      >
+                        <Cpu size={12} color="var(--secondary)" />
+                        Sync FHIR EHR
+                      </button>
+                      <button 
+                        onClick={() => alert("IoT Telemetry Integration: Scanning for BLE Smart Wearable diagnostic feeds... Bluetooth paired.")}
+                        style={{
+                          padding: '0.65rem',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: 'rgba(255,255,255,0.02)',
+                          color: 'var(--text)',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem'
+                        }}
+                      >
+                        <Activity size={12} color="var(--success)" />
+                        Pair IoT Wearables
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h3 className="results-header-text" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                    <CheckCircle2 color={results ? 'var(--success)' : 'var(--text-light)'} size={20} />
+                    Live Diagnostic Metrics
+                  </h3>
 
               {/* Epidemic Alert Notification Banner */}
               {epidemicAlert && epidemicAlert.matched && (

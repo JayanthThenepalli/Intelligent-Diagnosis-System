@@ -6,8 +6,8 @@ import tensorflow as tf
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models import SymptomRequest, DiagnosticResponse
-from database import save_diagnostic_log
+from models import SymptomRequest, DiagnosticResponse, PatientProfileRequest
+from database import save_diagnostic_log, save_patient_profile, get_patient_profiles
 
 app = FastAPI(title="MediWise Diagnostic API")
 
@@ -449,3 +449,22 @@ async def health_check():
         "symptoms": symptom_model is not None,
         "skin_cancer": skin_cancer_model is not None
     }}
+
+@app.get("/api/patients")
+async def fetch_patients():
+    try:
+        profiles = await get_patient_profiles()
+        return {"status": "success", "data": profiles}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/patients")
+async def create_patient(profile: PatientProfileRequest):
+    try:
+        success = await save_patient_profile(profile.dict())
+        if success:
+            return {"status": "success", "message": "Patient profile successfully saved."}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save profile.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

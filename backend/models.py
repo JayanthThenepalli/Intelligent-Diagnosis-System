@@ -15,3 +15,13 @@ class DiagnosticResponse(BaseModel):
     all_probabilities: dict
     epidemic_alert: Optional[Dict[str, Any]] = None
     general_triage_routing: Optional[Dict[str, Any]] = None
+
+class PatientProfileRequest(BaseModel):
+    patient_name: str
+    age: int
+    gender: str
+    blood_group: str
+    height: float
+    weight: Optional[float] = None
+    allergies: Optional[str] = ""
+    medical_history: Optional[str] = ""
