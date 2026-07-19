@@ -1596,7 +1596,7 @@ function App() {
                     Awaiting clinical input to execute diagnostics. Enter triage parameters or upload scan images to begin evaluation.
                   </p>
                 </div>
-              )}
+              </>)}
             </div>
           </div>
         </div>
