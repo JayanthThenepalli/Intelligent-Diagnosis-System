@@ -1112,7 +1112,9 @@ function App() {
                     {!isAnalyzing && <ChevronRight size={18} />}
                   </button>
                 </div>
-              ) : (
+              )}
+
+              {activeTab === 'skin' && (
                 <div>
                   <h2 className="card-title">
                     <ImageIcon className="logo-icon" size={20} />
