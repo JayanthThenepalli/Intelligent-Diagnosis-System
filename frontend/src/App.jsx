@@ -15,7 +15,8 @@ import {
   Lock,
   Mail,
   User,
-  LogOut
+  LogOut,
+  Home
 } from 'lucide-react';
 import './index.css';
 
@@ -49,7 +50,7 @@ const ALL_SYMPTOMS = [
 ];
 
 function App() {
-  const [activeTab, setActiveTab] = useState('symptoms');
+  const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('dark'); // 'dark' or 'light'
   
   // User Authentication State
@@ -315,13 +316,14 @@ function App() {
     }, 1000);
   };
 
-  const runAnalysis = async () => {
+  const runAnalysis = async (mode) => {
+    const runMode = mode || activeTab;
     setErrorMessage(null);
     setResults(null);
     setEpidemicAlert(null);
     setGeneralTriage(null);
     
-    if (activeTab === 'symptoms') {
+    if (runMode === 'symptoms') {
       if (selectedSymptoms.length === 0) {
         setErrorMessage("Please select at least one symptom to run the diagnostics.");
         return;
@@ -336,7 +338,7 @@ function App() {
     setIsAnalyzing(true);
     
     try {
-      if (activeTab === 'symptoms') {
+      if (runMode === 'symptoms') {
         const response = await fetch(`${API_BASE_URL}/api/diagnose/symptoms`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -691,18 +693,11 @@ function App() {
         
         <nav className="nav-section">
           <button 
-            className={`nav-item ${activeTab === 'symptoms' ? 'active' : ''}`}
-            onClick={() => {setActiveTab('symptoms'); setResults(null); setErrorMessage(null);}}
+            className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
+            onClick={() => {setActiveTab('home'); setResults(null); setErrorMessage(null);}}
           >
-            <FileText size={18} />
-            Symptom Checker
-          </button>
-          <button 
-            className={`nav-item ${activeTab === 'skin' ? 'active' : ''}`}
-            onClick={() => {setActiveTab('skin'); setResults(null); setErrorMessage(null);}}
-          >
-            <ImageIcon size={18} />
-            Image Scanner
+            <Home size={18} />
+            Home
           </button>
           <button 
             className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
@@ -797,138 +792,140 @@ function App() {
             </div>
           )}
 
-          <div className="split-layout">
-            {/* Left Column: Form Inputs */}
-            <div className="card">
-              {activeTab === 'profile' && (
-                <div>
-                  <h2 className="card-title">
-                    <User className="logo-icon" size={20} color="var(--primary)" />
-                    Personal Patient Profile
-                  </h2>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border)' }}>
-                    Linked Account: <strong style={{ color: 'var(--secondary)' }}>{user ? user.email : 'Unknown'}</strong>
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">Profile Owner Name</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        placeholder={user ? user.name : "e.g. John Doe"}
-                        value={patientName}
-                        onChange={(e) => setPatientName(e.target.value)}
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label className="form-label">Age (Years)</label>
-                        <input 
-                          type="number" 
-                          className="form-input" 
-                          placeholder="e.g. 45"
-                          value={patientAge}
-                          onChange={(e) => setPatientAge(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label className="form-label">Gender</label>
-                        <select 
-                          className="form-input" 
-                          value={patientGender}
-                          onChange={(e) => setPatientGender(e.target.value)}
-                          style={{ appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label className="form-label">Blood Group</label>
-                        <select 
-                          className="form-input" 
-                          value={patientBloodGroup}
-                          onChange={(e) => setPatientBloodGroup(e.target.value)}
-                          style={{ appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
-                        >
-                          <option value="">Select Blood</option>
-                          <option value="A+">A+</option>
-                          <option value="A-">A-</option>
-                          <option value="B+">B+</option>
-                          <option value="B-">B-</option>
-                          <option value="AB+">AB+</option>
-                          <option value="AB-">AB-</option>
-                          <option value="O+">O+</option>
-                          <option value="O-">O-</option>
-                        </select>
-                      </div>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label className="form-label">Height (cm)</label>
-                        <input 
-                          type="number" 
-                          className="form-input" 
-                          placeholder="e.g. 175"
-                          value={patientHeight}
-                          onChange={(e) => setPatientHeight(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div className="form-group" style={{ margin: 0, gridColumn: 'span 2' }}>
-                        <label className="form-label">Weight (kg)</label>
-                        <input 
-                          type="number" 
-                          className="form-input" 
-                          placeholder="e.g. 70"
-                          value={patientWeight}
-                          onChange={(e) => setPatientWeight(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">Allergies</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        placeholder="e.g. Penicillin, Peanuts"
-                        value={patientAllergies}
-                        onChange={(e) => setPatientAllergies(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">Medical History Notes</label>
-                      <textarea 
-                        className="form-input" 
-                        placeholder="e.g. Type-2 Diabetes, Asthma exacerbation history"
-                        value={patientMedicalHistory}
-                        onChange={(e) => setPatientMedicalHistory(e.target.value)}
-                        style={{ height: '80px', resize: 'none', fontFamily: 'inherit' }}
-                      />
-                    </div>
-                  </div>
-
-                  <button 
-                    className="btn-primary" 
-                    onClick={saveProfileToDatabase}
-                    style={{ width: '100%' }}
-                  >
-                    <span>Save Patient Profile</span>
-                    <CheckCircle2 size={18} />
-                  </button>
+          {activeTab === 'profile' && (
+            <div className="card" style={{ maxWidth: '750px', margin: '0 auto' }}>
+              <div>
+                <h2 className="card-title">
+                  <User className="logo-icon" size={20} color="var(--primary)" />
+                  Personal Patient Profile
+                </h2>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border)' }}>
+                  Linked Account: <strong style={{ color: 'var(--secondary)' }}>{user ? user.email : 'Unknown'}</strong>
                 </div>
-              )}
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Profile Owner Name</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder={user ? user.name : "e.g. John Doe"}
+                      value={patientName}
+                      onChange={(e) => setPatientName(e.target.value)}
+                    />
+                  </div>
 
-              {activeTab === 'symptoms' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Age (Years)</label>
+                      <input 
+                        type="number" 
+                        className="form-input" 
+                        placeholder="e.g. 45"
+                        value={patientAge}
+                        onChange={(e) => setPatientAge(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Gender</label>
+                      <select 
+                        className="form-input" 
+                        value={patientGender}
+                        onChange={(e) => setPatientGender(e.target.value)}
+                        style={{ appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Blood Group</label>
+                      <select 
+                        className="form-input" 
+                        value={patientBloodGroup}
+                        onChange={(e) => setPatientBloodGroup(e.target.value)}
+                        style={{ appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
+                      >
+                        <option value="">Select Blood</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Height (cm)</label>
+                      <input 
+                        type="number" 
+                        className="form-input" 
+                        placeholder="e.g. 175"
+                        value={patientHeight}
+                        onChange={(e) => setPatientHeight(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group" style={{ margin: 0, gridColumn: 'span 2' }}>
+                      <label className="form-label">Weight (kg)</label>
+                      <input 
+                        type="number" 
+                        className="form-input" 
+                        placeholder="e.g. 70"
+                        value={patientWeight}
+                        onChange={(e) => setPatientWeight(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Allergies</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="e.g. Penicillin, Peanuts"
+                      value={patientAllergies}
+                      onChange={(e) => setPatientAllergies(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Medical History Notes</label>
+                    <textarea 
+                      className="form-input" 
+                      placeholder="e.g. Type-2 Diabetes, Asthma exacerbation history"
+                      value={patientMedicalHistory}
+                      onChange={(e) => setPatientMedicalHistory(e.target.value)}
+                      style={{ height: '80px', resize: 'none', fontFamily: 'inherit' }}
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  className="btn-primary" 
+                  onClick={saveProfileToDatabase}
+                  style={{ width: '100%' }}
+                >
+                  <span>Save Patient Profile</span>
+                  <CheckCircle2 size={18} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'home' && (
+            <div className="split-layout" style={{ gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              {/* Symptom Checker Card */}
+              <div className="card">
                 <div>
                   <h2 className="card-title">
                     <FileText className="logo-icon" size={20} />
@@ -1082,16 +1079,18 @@ function App() {
 
                   <button 
                     className="btn-primary" 
-                    onClick={runAnalysis}
+                    onClick={() => runAnalysis('symptoms')}
                     disabled={isAnalyzing}
+                    style={{ width: '100%' }}
                   >
                     {isAnalyzing ? 'Processing Triage Data...' : 'Run Diagnostics'}
                     {!isAnalyzing && <ChevronRight size={18} />}
                   </button>
                 </div>
-              )}
+              </div>
 
-              {activeTab === 'skin' && (
+              {/* Image Scanner Card */}
+              <div className="card">
                 <div>
                   <h2 className="card-title">
                     <ImageIcon className="logo-icon" size={20} />
@@ -1163,77 +1162,111 @@ function App() {
 
                   <button 
                     className="btn-primary" 
-                    onClick={runAnalysis}
+                    onClick={() => runAnalysis('skin')}
                     disabled={isAnalyzing || skinImages.length === 0}
-                    style={{opacity: (skinImages.length === 0 && !isAnalyzing) ? 0.5 : 1}}
+                    style={{opacity: (skinImages.length === 0 && !isAnalyzing) ? 0.5 : 1, width: '100%'}}
                   >
                     {isAnalyzing ? 'Running Keras Feature Extraction...' : 'Analyze Uploaded Image'}
                     {!isAnalyzing && <ChevronRight size={18} />}
                   </button>
                 </div>
-              )}
+              </div>
             </div>
+          )}
 
-            {/* Right Column: Diagnostic Results Dashboard */}
-            {activeTab !== 'profile' && (
-              <div className="results-panel" style={{ minHeight: '520px', display: 'flex', flexDirection: 'column' }}>
-                  <h3 className="results-header-text" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-                    <CheckCircle2 color={results ? 'var(--success)' : 'var(--text-light)'} size={20} />
-                    Live Diagnostic Metrics
-                  </h3>
-
-              {/* Epidemic Alert Notification Banner */}
-              {epidemicAlert && epidemicAlert.matched && (
-                <div style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
-                  border: '1.5px solid #ef4444',
-                  borderRadius: '10px',
-                  padding: '1rem',
-                  marginBottom: '1.5rem',
-                  boxSizing: 'border-box'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
-                    <AlertTriangle size={18} />
-                    High-Priority Epidemic Alert
-                  </div>
-                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)' }}>
-                    {epidemicAlert.disease}
-                  </h4>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '0.75rem', lineHeight: '1.4' }}>
-                    <strong>Protocol:</strong> {epidemicAlert.protocol}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginRight: '0.25rem' }}>Matching symptoms:</span>
-                    {epidemicAlert.symptoms_matched.map((s, i) => (
-                      <span key={i} style={{ fontSize: '0.7rem', backgroundColor: '#ef4444', color: '#fff', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 600 }}>
-                        {s.replace(/_/g, ' ')}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {isAnalyzing ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', color: 'var(--text-light)' }}>
-                  <div style={{
-                    width: '42px',
-                    height: '42px',
+          {/* Diagnostic Results Overlay Modal */}
+          {results && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(10, 15, 30, 0.75)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '2rem',
+              boxSizing: 'border-box'
+            }}>
+              <div className="results-panel" style={{
+                width: '100%',
+                maxWidth: '560px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                borderRadius: '16px',
+                border: '1px solid var(--border)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+                backgroundColor: 'var(--surface)',
+                padding: '2.25rem 2rem',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                boxSizing: 'border-box'
+              }}>
+                <button 
+                  onClick={() => { setResults(null); setEpidemicAlert(null); setGeneralTriage(null); }}
+                  style={{
+                    position: 'absolute',
+                    top: '1.25rem',
+                    right: '1.25rem',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--border)',
                     borderRadius: '50%',
-                    border: '3px solid var(--border)',
-                    borderTopColor: 'var(--primary)',
-                    animation: 'spin 1s linear infinite'
-                  }}></div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>Analyzing Diagnostic Parameters...</div>
-                  <div style={{ fontSize: '0.75rem', textAlign: 'center', maxWidth: '240px' }}>Extracting features and executing Keras neural network weights.</div>
-                  
-                  {/* CSS inline trick for spin animation */}
-                  <style>{`
-                    @keyframes spin {
-                      to { transform: rotate(360deg); }
-                    }
-                  `}</style>
-                </div>
-              ) : results ? (
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    zIndex: 50
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'}
+                >
+                  <X size={16} />
+                </button>
+
+                <h3 className="results-header-text" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem', marginTop: 0 }}>
+                  <CheckCircle2 color="var(--success)" size={20} />
+                  Live Diagnostic Metrics
+                </h3>
+
+                {/* Epidemic Alert Notification Banner */}
+                {epidemicAlert && epidemicAlert.matched && (
+                  <div style={{
+                    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                    border: '1.5px solid #ef4444',
+                    borderRadius: '10px',
+                    padding: '1rem',
+                    marginBottom: '1.5rem',
+                    boxSizing: 'border-box'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                      <AlertTriangle size={18} />
+                      High-Priority Epidemic Alert
+                    </div>
+                    <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text)' }}>
+                      {epidemicAlert.disease}
+                    </h4>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                      <strong>Protocol:</strong> {epidemicAlert.protocol}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginRight: '0.25rem' }}>Matching symptoms:</span>
+                      {epidemicAlert.symptoms_matched.map((s, i) => (
+                        <span key={i} style={{ fontSize: '0.7rem', backgroundColor: '#ef4444', color: '#fff', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 600 }}>
+                          {s.replace(/_/g, ' ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                   {/* Top Result - Radial Dial */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem', textAlign: 'center' }}>
@@ -1346,33 +1379,43 @@ function App() {
                     Export Referrals Diagnostic Report (PDF)
                   </button>
                 </div>
-              ) : (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1.5rem', boxSizing: 'border-box' }}>
-                  {/* ECG Heartbeat Wave SVG */}
-                  <svg viewBox="0 0 300 100" style={{ width: '100%', maxWidth: '240px', height: 'auto', marginBottom: '1.75rem', overflow: 'visible' }}>
-                    <path 
-                      d="M0,50 L80,50 L90,30 L100,70 L110,50 L140,50 L150,15 L160,85 L170,50 L190,50 L200,42 L210,58 L220,50 L300,50" 
-                      fill="none" 
-                      stroke="var(--primary)" 
-                      strokeWidth="3.5" 
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeDasharray="1000"
-                      strokeDashoffset="1000"
-                      style={{
-                        animation: 'ecg-dash 3.5s linear infinite'
-                      }}
-                    />
-                  </svg>
-                  <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text)', fontSize: '1rem', fontWeight: 700 }}>Diagnostic Monitor Offline</h3>
-                  <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--text-light)', textAlign: 'center', maxWidth: '260px', lineHeight: '1.5' }}>
-                    Awaiting clinical input to execute diagnostics. Enter triage parameters or upload scan images to begin evaluation.
-                  </p>
-                </div>
-              )}
+              </div>
             </div>
           )}
-          </div>
+
+          {/* Analysis Loading Overlay Modal */}
+          {isAnalyzing && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(10, 15, 30, 0.8)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1050,
+              padding: '2rem',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', color: 'var(--text-light)', textAlign: 'center' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  border: '3px solid var(--border)',
+                  borderTopColor: 'var(--primary)',
+                  animation: 'spin 1.5s linear infinite'
+                }}></div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text)' }}>Analyzing Diagnostic Parameters...</div>
+                <div style={{ fontSize: '0.8rem', textAlign: 'center', maxWidth: '280px', lineHeight: '1.4' }}>
+                  Extracting medical features and executing Keras neural network weights.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
