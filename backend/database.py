@@ -44,16 +44,7 @@ async def save_diagnostic_log(diagnosis_type: str, result: dict, patient_metadat
 # Mock in-memory patient list fallback
 mock_patients = [
     {
-        "patient_name": "PT-88102 (John Doe)",
-        "age": 45,
-        "gender": "Male",
-        "blood_group": "O+",
-        "height": 178.0,
-        "weight": 82.0,
-        "allergies": "Penicillin",
-        "medical_history": "Mild Hypertension"
-    },
-    {
+        "email": "uiufds@gmail.com",
         "patient_name": "PT-88105 (Sarah Smith)",
         "age": 29,
         "gender": "Female",
@@ -70,26 +61,28 @@ async def save_patient_profile(patient: dict):
     if db is not None:
         try:
             collection = db["patient_profiles"]
-            name = patient.get("patient_name")
-            await collection.replace_one({"patient_name": name}, patient, upsert=True)
+            email = patient.get("email")
+            await collection.replace_one({"email": email}, patient, upsert=True)
             return True
         except Exception as e:
             print(f"Failed to save patient to MongoDB: {e}")
     
     # In-memory fallback
-    name = patient.get("patient_name")
-    mock_patients = [p for p in mock_patients if p["patient_name"] != name]
+    email = patient.get("email")
+    mock_patients = [p for p in mock_patients if p.get("email") != email]
     mock_patients.append(patient)
     return True
 
-async def get_patient_profiles():
+async def get_patient_profile(email: str):
     if db is not None:
         try:
             collection = db["patient_profiles"]
-            cursor = collection.find({}, {"_id": 0})
-            patients = await cursor.to_list(length=100)
-            if patients:
-                return patients
+            profile = await collection.find_one({"email": email}, {"_id": 0})
+            if profile:
+                return profile
         except Exception as e:
-            print(f"Failed to fetch patient profiles: {e}")
-    return mock_patients
+            print(f"Failed to fetch patient profile: {e}")
+    for p in mock_patients:
+        if p.get("email") == email:
+            return p
+    return None

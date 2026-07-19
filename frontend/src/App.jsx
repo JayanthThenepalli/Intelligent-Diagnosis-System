@@ -97,25 +97,37 @@ function App() {
   const [activePatient, setActivePatient] = useState(null);
   const [patientSearchQuery, setPatientSearchQuery] = useState("");
 
-  const fetchSavedPatients = async () => {
+  const fetchUserProfile = async (userEmail) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/patients`);
+      const response = await fetch(`${API_BASE_URL}/api/patients?email=${encodeURIComponent(userEmail)}`);
       if (response.ok) {
         const data = await response.json();
-        setSavedPatientsList(data.data || []);
+        if (data.status === "success" && data.data) {
+          const p = data.data;
+          setPatientName(p.patient_name || "");
+          setPatientAge(p.age || "");
+          setPatientGender(p.gender || "");
+          setPatientBloodGroup(p.blood_group || "");
+          setPatientHeight(p.height || "");
+          setPatientWeight(p.weight || "");
+          setPatientAllergies(p.allergies || "");
+          setPatientMedicalHistory(p.medical_history || "");
+        }
       }
     } catch (e) {
-      console.error("Failed to load patient profiles:", e);
+      console.error("Failed to load user profile:", e);
     }
   };
 
   useEffect(() => {
-    fetchSavedPatients();
-  }, []);
+    if (user && user.email) {
+      fetchUserProfile(user.email);
+    }
+  }, [user]);
 
   const saveProfileToDatabase = async () => {
-    if (!patientName) {
-      setErrorMessage("Patient Name / ID is required to create a profile.");
+    if (!user || !user.email) {
+      setErrorMessage("No active user session detected.");
       return;
     }
     try {
@@ -123,7 +135,8 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          patient_name: patientName,
+          email: user.email,
+          patient_name: patientName || user.name,
           age: patientAge ? parseInt(patientAge) : 0,
           gender: patientGender || "Other",
           blood_group: patientBloodGroup || "O+",
@@ -134,27 +147,10 @@ function App() {
         })
       });
       if (response.ok) {
-        await fetchSavedPatients();
-        const newPatient = {
-          patient_name: patientName,
-          age: patientAge,
-          gender: patientGender,
-          blood_group: patientBloodGroup,
-          height: patientHeight,
-          weight: patientWeight,
-          allergies: patientAllergies,
-          medical_history: patientMedicalHistory
-        };
-        setActivePatient(newPatient);
-        setPatientName("");
-        setPatientAge("");
-        setPatientGender("");
-        setPatientBloodGroup("");
-        setPatientHeight("");
-        setPatientWeight("");
-        setPatientAllergies("");
-        setPatientMedicalHistory("");
-        alert("Patient profile saved successfully!");
+        alert("Personal profile updated successfully!");
+        fetchUserProfile(user.email);
+      } else {
+        setErrorMessage("Failed to update profile on backend.");
       }
     } catch (e) {
       console.error(e);
@@ -346,11 +342,11 @@ function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             symptoms: selectedSymptoms,
-            patient_name: activePatient ? activePatient.patient_name : "Anonymous",
-            age: activePatient && activePatient.age ? parseInt(activePatient.age) : null,
-            gender: activePatient ? activePatient.gender : null,
-            blood_group: activePatient ? activePatient.blood_group : null,
-            height: activePatient && activePatient.height ? parseFloat(activePatient.height) : null
+            patient_name: patientName || (user ? user.name : "Anonymous"),
+            age: patientAge ? parseInt(patientAge) : null,
+            gender: patientGender || null,
+            blood_group: patientBloodGroup || null,
+            height: patientHeight ? parseFloat(patientHeight) : null
           })
         });
         
@@ -371,11 +367,11 @@ function App() {
         const formData = new FormData();
         formData.append('file', skinImages[0]);
         formData.append('symptoms', selectedSymptoms.join(', '));
-        formData.append('patient_name', activePatient ? activePatient.patient_name : "Anonymous");
-        if (activePatient && activePatient.age) formData.append('age', activePatient.age);
-        if (activePatient && activePatient.gender) formData.append('gender', activePatient.gender);
-        if (activePatient && activePatient.blood_group) formData.append('blood_group', activePatient.blood_group);
-        if (activePatient && activePatient.height) formData.append('height', activePatient.height);
+        formData.append('patient_name', patientName || (user ? user.name : "Anonymous"));
+        if (patientAge) formData.append('age', patientAge);
+        if (patientGender) formData.append('gender', patientGender);
+        if (patientBloodGroup) formData.append('blood_group', patientBloodGroup);
+        if (patientHeight) formData.append('height', patientHeight);
         
         const response = await fetch(`${API_BASE_URL}/api/diagnose/skin-lesion`, {
           method: 'POST',
@@ -716,29 +712,7 @@ function App() {
             Patient Profile
           </button>
 
-          {activePatient && (
-            <div style={{
-              marginTop: '1.25rem',
-              padding: '0.75rem 0.85rem',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(16, 185, 129, 0.08)',
-              border: '1px dashed rgba(16, 185, 129, 0.25)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.2rem',
-              boxSizing: 'border-box'
-            }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Active Patient
-              </div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {activePatient.patient_name}
-              </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-light)' }}>
-                {activePatient.age} yrs • {activePatient.gender} • {activePatient.blood_group}
-              </div>
-            </div>
-          )}
+
 
           <button className="theme-toggle-btn" onClick={toggleTheme} style={{marginTop: '1.5rem', width: '100%', justifyContent: 'center'}}>
             {theme === 'dark' ? (
@@ -830,16 +804,19 @@ function App() {
                 <div>
                   <h2 className="card-title">
                     <User className="logo-icon" size={20} color="var(--primary)" />
-                    Patient Profile Registry
+                    Personal Patient Profile
                   </h2>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border)' }}>
+                    Linked Account: <strong style={{ color: 'var(--secondary)' }}>{user ? user.email : 'Unknown'}</strong>
+                  </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">Patient Name / ID</label>
+                      <label className="form-label">Profile Owner Name</label>
                       <input 
                         type="text" 
                         className="form-input" 
-                        placeholder="e.g. PT-88102 (John Doe)"
+                        placeholder={user ? user.name : "e.g. John Doe"}
                         value={patientName}
                         onChange={(e) => setPatientName(e.target.value)}
                       />

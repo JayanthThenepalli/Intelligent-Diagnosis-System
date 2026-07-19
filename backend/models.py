@@ -17,6 +17,7 @@ class DiagnosticResponse(BaseModel):
     general_triage_routing: Optional[Dict[str, Any]] = None
 
 class PatientProfileRequest(BaseModel):
+    email: str
     patient_name: str
     age: int
     gender: str

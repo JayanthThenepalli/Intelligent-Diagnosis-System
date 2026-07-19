@@ -7,7 +7,7 @@ from PIL import Image
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import SymptomRequest, DiagnosticResponse, PatientProfileRequest
-from database import save_diagnostic_log, save_patient_profile, get_patient_profiles
+from database import save_diagnostic_log, save_patient_profile, get_patient_profile
 
 app = FastAPI(title="MediWise Diagnostic API")
 
@@ -451,10 +451,13 @@ async def health_check():
     }}
 
 @app.get("/api/patients")
-async def fetch_patients():
+async def fetch_patient(email: str):
     try:
-        profiles = await get_patient_profiles()
-        return {"status": "success", "data": profiles}
+        profile = await get_patient_profile(email)
+        if profile:
+            return {"status": "success", "data": profile}
+        else:
+            return {"status": "not_found", "message": "No profile exists for this email."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
