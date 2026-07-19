@@ -652,6 +652,98 @@ function App() {
               </>
             )}
           </button>
+          
+          {/* Patient Demographics Profile (Sidebar Version) */}
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1rem',
+            borderRadius: '12px',
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.65rem'
+          }}>
+            <h3 style={{ fontSize: '0.8rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <User size={13} color="var(--primary)" />
+              Patient Profile
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div>
+                <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Patient Name / ID</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="e.g. PT-88102"
+                  value={patientName}
+                  onChange={(e) => setPatientName(e.target.value)}
+                  style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Age (Years)</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    placeholder="e.g. 45"
+                    value={patientAge}
+                    onChange={(e) => setPatientAge(e.target.value)}
+                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2/rem', display: 'block' }}>Gender</label>
+                  <select 
+                    className="form-input" 
+                    value={patientGender}
+                    onChange={(e) => setPatientGender(e.target.value)}
+                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box', appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
+                  >
+                    <option value="">Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Blood Group</label>
+                  <select 
+                    className="form-input" 
+                    value={patientBloodGroup}
+                    onChange={(e) => setPatientBloodGroup(e.target.value)}
+                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box', appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
+                  >
+                    <option value="">Blood</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label" style={{ fontSize: '0.7rem', marginBottom: '0.2rem', display: 'block' }}>Height (cm)</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    placeholder="e.g. 175"
+                    value={patientHeight}
+                    onChange={(e) => setPatientHeight(e.target.value)}
+                    style={{ padding: '0.45rem 0.65rem', fontSize: '0.8rem', width: '100%', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* User Profile Card and Sign Out */}
           <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
@@ -725,95 +817,6 @@ function App() {
           <div className="split-layout">
             {/* Left Column: Form Inputs */}
             <div className="card">
-              {/* Patient Profile Demographics Form */}
-              <div style={{
-                marginBottom: '1.75rem',
-                paddingBottom: '1.5rem',
-                borderBottom: '1px solid var(--border)'
-              }}>
-                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)' }}>
-                  <User size={16} color="var(--primary)" />
-                  Patient Demographics Profile
-                </h3>
-                
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '0.75rem'
-                }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Patient Name / ID</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. PT-88102"
-                      value={patientName}
-                      onChange={(e) => setPatientName(e.target.value)}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
-                    />
-                  </div>
-                  
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Age (Years)</label>
-                    <input 
-                      type="number" 
-                      className="form-input" 
-                      placeholder="e.g. 45"
-                      value={patientAge}
-                      onChange={(e) => setPatientAge(e.target.value)}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Gender</label>
-                    <select 
-                      className="form-input" 
-                      value={patientGender}
-                      onChange={(e) => setPatientGender(e.target.value)}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Blood Group</label>
-                    <select 
-                      className="form-input" 
-                      value={patientBloodGroup}
-                      onChange={(e) => setPatientBloodGroup(e.target.value)}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', appearance: 'auto', backgroundColor: 'var(--input-bg)' }}
-                    >
-                      <option value="">Select Blood</option>
-                      <option value="A+">A+</option>
-                      <option value="A-">A-</option>
-                      <option value="B+">B+</option>
-                      <option value="B-">B-</option>
-                      <option value="AB+">AB+</option>
-                      <option value="AB-">AB-</option>
-                      <option value="O+">O+</option>
-                      <option value="O-">O-</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0, gridColumn: 'span 2' }}>
-                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Height (cm)</label>
-                    <input 
-                      type="number" 
-                      className="form-input" 
-                      placeholder="e.g. 175"
-                      value={patientHeight}
-                      onChange={(e) => setPatientHeight(e.target.value)}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
-                    />
-                  </div>
-                </div>
-              </div>
-
               {activeTab === 'symptoms' ? (
                 <div>
                   <h2 className="card-title">
