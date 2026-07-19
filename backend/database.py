@@ -15,7 +15,7 @@ if MONGODB_URI:
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
 
-async def save_diagnostic_log(diagnosis_type: str, result: dict):
+async def save_diagnostic_log(diagnosis_type: str, result: dict, patient_metadata: dict = None):
     """
     Saves diagnostic logs to MongoDB Atlas if available, or prints local fallback.
     """
@@ -26,6 +26,8 @@ async def save_diagnostic_log(diagnosis_type: str, result: dict):
         "confidence": result.get("confidence"),
         "full_results": result
     }
+    if patient_metadata:
+        log_entry["patient_details"] = patient_metadata
     
     if db is not None:
         try:

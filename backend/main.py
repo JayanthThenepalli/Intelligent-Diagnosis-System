@@ -350,8 +350,15 @@ async def diagnose_symptoms(request: SymptomRequest):
         "general_triage_routing": general_triage_routing
     }
     
-    # Save to MongoDB
-    await save_diagnostic_log("symptoms", result)
+    # Save to MongoDB with patient details
+    patient_metadata = {
+        "patient_name": request.patient_name,
+        "age": request.age,
+        "gender": request.gender,
+        "blood_group": request.blood_group,
+        "height": request.height
+    }
+    await save_diagnostic_log("symptoms", result, patient_metadata)
     
     return result
 
@@ -360,7 +367,12 @@ from fastapi import Form
 @app.post("/api/diagnose/skin-lesion", response_model=DiagnosticResponse)
 async def diagnose_skin_lesion(
     file: UploadFile = File(...),
-    symptoms: str = Form(None)
+    symptoms: str = Form(None),
+    patient_name: str = Form("Anonymous"),
+    age: int = Form(None),
+    gender: str = Form(None),
+    blood_group: str = Form(None),
+    height: float = Form(None)
 ):
     if skin_cancer_model is None:
         raise HTTPException(status_code=500, detail="Skin Cancer Model is not loaded.")
@@ -416,8 +428,15 @@ async def diagnose_skin_lesion(
             "all_probabilities": prob_dict
         }
         
-        # Save to MongoDB
-        await save_diagnostic_log("skin_lesion", result)
+        # Save to MongoDB with patient details
+        patient_metadata = {
+            "patient_name": patient_name,
+            "age": age,
+            "gender": gender,
+            "blood_group": blood_group,
+            "height": height
+        }
+        await save_diagnostic_log("skin_lesion", result, patient_metadata)
         
         return result
         
